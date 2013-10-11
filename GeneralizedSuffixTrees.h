@@ -9,17 +9,19 @@
 #define GENERALIZEDSUFFIXTREES_H_
 
 #include <vector>
-#include <string>
 
 #include "Node.h"
-#
+#include "CaseInfo.h"
+
+using namespace std;
 
 class GeneralizedSuffixTrees {
 public:
-	GeneralizedSuffixTrees(string ss[], int numOfStrings);
+	GeneralizedSuffixTrees(string ss[], int& numOfStrings);
 	virtual ~GeneralizedSuffixTrees();
 
-	void addString(string s);
+	void addString(string& s);
+	CaseInfo findCase(string s, Node& n);
 
 private:
 	vector<Node*> nodes;

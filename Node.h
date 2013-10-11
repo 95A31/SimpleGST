@@ -18,6 +18,9 @@ public:
 	Node();
 	virtual ~Node();
 
+	vector<Node*> getChildren();
+	string getLabel();
+
 private:
 	Node* father;
 	string label;
