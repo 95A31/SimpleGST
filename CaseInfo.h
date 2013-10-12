@@ -9,6 +9,7 @@
 #define CASEINFO_H_
 
 #include <string>
+#include "Node.h"
 
 using namespace std;
 
@@ -18,7 +19,7 @@ public:
 	CaseInfo();
 	virtual ~CaseInfo();
 
-	enum CaseType{CONTAINS,NOT_CONTAINS, EQUAL, IS_SUBSTRING_OF, DIFFERENT};
+	enum CaseType{CASE_1, CASE_2, CASE_3};
 
 	CaseType getCaseType();
 	int getIndex();
@@ -26,6 +27,7 @@ public:
 private:
 	CaseType caseType;
 	int index;
+	//Node& node;
 };
 
 #endif /* CASEINFO_H_ */

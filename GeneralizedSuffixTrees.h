@@ -12,6 +12,7 @@
 
 #include "Node.h"
 #include "CaseInfo.h"
+#include "Utils.h"
 
 using namespace std;
 
@@ -21,9 +22,14 @@ public:
 	virtual ~GeneralizedSuffixTrees();
 
 	void addString(string& s);
-	CaseInfo findCase(string s, Node& n);
+	void addSuffix(string s, Node& n);
 
+	void handleCommonPrefixCase(Node&n, short& index, string& suffix);
+	void handleEqualCase(Node&n, char c);
+	void handleDifferentCase(Node&n, string& s);
 private:
+	short suffixIndex;
+	unsigned int myNumOfStrings;
 	vector<Node*> nodes;
 };
 
