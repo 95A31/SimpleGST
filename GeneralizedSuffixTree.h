@@ -20,8 +20,6 @@
 #ifndef GENERALIZEDSUFFIXTREE_H_
 #define GENERALIZEDSUFFIXTREE_H_
 
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-
 #include <vector>
 #include <string>
 #include <unordered_map>
