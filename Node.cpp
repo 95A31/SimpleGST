@@ -1,79 +1,39 @@
-/*
- * Node.cpp
-
+/*******************************************************************************
+ *     Copyright (c) 2013 95A31.
+ * 	
+ *     This file is part of GeneralizedSuffixTree.
  *
- *  Created on: 11/ott/2013
- *      Author: user
- */
+ *     GeneralizedSuffixTree is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     GeneralizedSuffixTree is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with GeneralizedSuffixTree.  If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
 
 #include "Node.h"
 
+using namespace std;
+
 Node::Node() {
-	myFather = nullptr;
-	myLabel = string();
-	myChildren = vector<Node*>();
-	vector<suffixInfo> myLeafInfo= vector<suffixInfo>();
 }
 
-Node::Node(Node* father, string label, vector<Node*> children) {
-	myFather = father;
-	myLabel = label;
-	myChildren = children;
-	vector<suffixInfo> myLeafInfo = vector<suffixInfo>();
-}
 
-Node::Node(Node* father, string label, int indexOfString, short indexInString) {
-	myFather = father;
-	myLabel = string();
-	myChildren = vector<Node*>();
-	vector<suffixInfo> leafInfo = vector<suffixInfo>();
-	leafInfo.push_back(suffixInfo(indexOfString, indexInString));
+Node::Node(int si, short lsi, short lei) {
+	stringIdx = si;
+	labelStartIdx = lsi;
+	labelEndIdx = lei;
 }
-
 
 Node::~Node() {
-	// TODO Auto-generated destructor stub
 }
 
-vector<Node*> Node::getChildren(){
-	return myChildren;
+void Node::addSuffix(int stringIdx, short charIdx){
+	suffixes.push_back(make_pair(stringIdx, charIdx));
 }
-
-void Node::setChildren(Node* c1, Node* c2){
-	myChildren.clear();
-	if(c1->myLabel < c2->myLabel){
-		myChildren.push_back(c1);
-		myChildren.push_back(c2);
-	} else {
-		myChildren.push_back(c2);
-		myChildren.push_back(c1);
-	}
-}
-
-string Node::getLabel(){
-	return myLabel;
-}
-
-void Node::setLabel(string label){
-	myLabel = label;
-}
-
-Node* Node::getFather(){
-	return myFather;
-}
-
-vector<Node::suffixInfo> Node::getLeafInfo(){
-	return myLeaflInfo;
-}
-void Node::setLeafInfo(vector<suffixInfo> leafInfo){
-	myLeaflInfo = leafInfo;
-}
-void Node::resetLeaflInfo(){
-	myLeaflInfo.clear();
-}
-
-void Node::appendToLabel(char c){
-	myLabel.append(1, c);
-}
-
-

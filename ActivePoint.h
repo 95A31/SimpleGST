@@ -17,32 +17,21 @@
  *     along with GeneralizedSuffixTree.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-#ifndef NODE_H_
-#define NODE_H_
+#ifndef ACTIVEPOINT_H_
+#define ACTIVEPOINT_H_
 
-#include <unordered_map>
-#include <vector>
-
-using namespace std;
-
-class Node {
+class ActivePoint {
 public:
-	Node();
-	Node(int stringIdx, short labelStartIdx, short labelEndInx);
-	virtual ~Node();
+	ActivePoint();
+	virtual ~ActivePoint();
 
-	typedef pair<int,short> suffix;
-	void addSuffix(int stringIdx, short suffixIdx);
+	int node = -1;
+	short edge = -1;
+	short idx = -1;
+	short remainder = -1;
 
-	//Label is extracted from string in this way: [labelStartIdx,labelEndInx)
-	int stringIdx = -1;
-	short labelStartIdx = -1;
-	short labelEndIdx = -1;
-
-	int suffixLink = -1;
-	unordered_map<char,int> children;
-
-	vector<suffix> suffixes;
+	void set(int n , short e, short p);
+	void reset();
 };
 
-#endif /* NODE_H_ */
+#endif /* ACTIVEPOINT_H_ */

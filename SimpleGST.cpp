@@ -17,32 +17,32 @@
  *     along with GeneralizedSuffixTree.  If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-#ifndef NODE_H_
-#define NODE_H_
-
-#include <unordered_map>
+#include <iostream>
+#include <fstream>
 #include <vector>
+#include <string>
+
+#include "GeneralizedSuffixTree.h"
 
 using namespace std;
 
-class Node {
-public:
-	Node();
-	Node(int stringIdx, short labelStartIdx, short labelEndInx);
-	virtual ~Node();
+int main(int argc, char *argv[]) {
 
-	typedef pair<int,short> suffix;
-	void addSuffix(int stringIdx, short suffixIdx);
+	if (argc < 3) {
+		cerr << "Too few arguments.\n";
+		cerr << "Example of usage: SimpleGST input.txt output.dot\n";
+		return -1;
+	}
 
-	//Label is extracted from string in this way: [labelStartIdx,labelEndInx)
-	int stringIdx = -1;
-	short labelStartIdx = -1;
-	short labelEndIdx = -1;
+	ifstream readsFile(argv[1]);
+	vector<string> reads;
+	string read;
+	while (getline(readsFile, read))
+		reads.push_back(read);
 
-	int suffixLink = -1;
-	unordered_map<char,int> children;
+    GeneralizedSuffixTree gst = GeneralizedSuffixTree(reads);
 
-	vector<suffix> suffixes;
-};
+	gst.exportInDotFormat(argv[2]);
 
-#endif /* NODE_H_ */
+	return 0;
+}
