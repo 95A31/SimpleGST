@@ -1,7 +1,7 @@
 /*******************************************************************************
  *     Copyright (c) 2013 95A31.
- *
- *     This file is part of GeneralizedSuffixTree.
+ * 	
+ *     This file is part of SimpleGST.
  *
  *     GeneralizedSuffixTree is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
