@@ -23,16 +23,23 @@
 #include <string>
 
 #include "GeneralizedSuffixTree.h"
+#include "Tasks.h"
 
 using namespace std;
 
 int main(int argc, char *argv[]) {
 
-	if (argc < 3) {
+	if (argc < 2) {
 		cerr << "Too few arguments.\n";
+		cerr << "Example of usage: SimpleGST input.txt\n";
 		cerr << "Example of usage: SimpleGST input.txt output.dot\n";
 		return -1;
 	}
+	cout << "*******************************************************************************" << endl;
+	cout << "* Welcome to SimpleGST, a Simple C++ implementation of Generalized Suffix Tree" << endl;
+	cout << "* Copyright (c) 95A31" << endl;
+	cout << "* Source: https://github.com/95A31/SimpleGST" << endl;
+	cout << "*******************************************************************************" << endl;
 
 	ifstream readsFile(argv[1]);
 	vector<string> reads;
@@ -40,9 +47,14 @@ int main(int argc, char *argv[]) {
 	while (getline(readsFile, read))
 		reads.push_back(read);
 
-    GeneralizedSuffixTree gst = GeneralizedSuffixTree(reads);
+	GeneralizedSuffixTree gst(reads);
 
-	gst.exportInDotFormat(argv[2]);
+	if (argc == 2) {
+		Tasks t(&gst);
+		t.Task1();
+	} else if (argc == 3) {
+		gst.exportInDotFormat(argv[2]);
+	}
 
 	return 0;
 }

@@ -37,3 +37,7 @@ Node::~Node() {
 void Node::addSuffix(int stringIdx, short charIdx){
 	suffixes.push_back(make_pair(stringIdx, charIdx));
 }
+
+short Node::getLabelLength(){
+	return labelEndIdx - labelStartIdx + 1;
+}

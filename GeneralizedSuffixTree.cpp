@@ -19,7 +19,6 @@
 
 // This algorithm is a revision of this one:
 // http://stackoverflow.com/questions/9452701/ukkonens-suffix-tree-algorithm-in-plain-english/9513423#9513423
-
 #include "GeneralizedSuffixTree.h"
 
 #include <queue>
@@ -33,9 +32,21 @@ GeneralizedSuffixTree::GeneralizedSuffixTree(vector<string>& strings) {
 	initialize(strings);
 
 	for (int i = 0; i < (int) strings.size(); i++) {
+		cout << "Adding string " << currentStringIdx << "\r";
 		clearStringInfo();
-		addString();
+		addNextString();
 	}
+	cout << "Adding string " << currentStringIdx << " [OK]" << endl;
+}
+
+GeneralizedSuffixTree::GeneralizedSuffixTree(string s) {
+
+	strings.push_back(s);
+
+	initialize(strings);
+
+	clearStringInfo();
+	addNextString();
 }
 
 GeneralizedSuffixTree::~GeneralizedSuffixTree() {
@@ -45,7 +56,7 @@ void GeneralizedSuffixTree::initialize(vector<string>& ss) {
 	strings = ss;
 
 	currentNodeID = 0;
-	root = addNode(0, 0, 0);
+	rootIdx = addNode(0, 0, 0);
 
 	currentStringIdx = 0;
 }
@@ -55,7 +66,16 @@ void GeneralizedSuffixTree::clearStringInfo() {
 	currentStringLength = 0;
 }
 
-void GeneralizedSuffixTree::addString() {
+int GeneralizedSuffixTree::addString(string& s) {
+	strings.push_back(s);
+
+	clearStringInfo();
+	addNextString();
+
+	return currentStringIdx - 1;
+}
+
+void GeneralizedSuffixTree::addNextString() {
 	strings[currentStringIdx].push_back('$');
 	currentStringLength = (short) strings[currentStringIdx].length();
 
@@ -66,6 +86,7 @@ void GeneralizedSuffixTree::addString() {
 }
 
 void GeneralizedSuffixTree::extend() {
+
 	char c = strings[currentStringIdx][currentCharIdx];
 
 	lastInsertedNode = 0;
@@ -77,43 +98,60 @@ void GeneralizedSuffixTree::extend() {
 			activePoint.edge = currentCharIdx;
 
 		if (nodes[activePoint.node].children.count(getActiveEdge()) == 0) {
-			activePoint.remainder--;
-			int newLeaf = addLeaf(currentStringIdx, currentCharIdx, currentStringLength);
+			int newLeaf = addLeaf(currentStringIdx, currentCharIdx, currentStringLength - 1);
 			nodes[activePoint.node].children[getActiveEdge()] = newLeaf;
 			setSuffixLink(activePoint.node);
 		} else {
-			int child = nodes[activePoint.node].children[getActiveEdge()];
 
-			if (walkDown(child))
-				continue;
-
-			if (strings[nodes[child].stringIdx][nodes[child].labelStartIdx + activePoint.idx] == c) {
-				activePoint.idx++;
-				setSuffixLink(activePoint.node);
-				break;
+			if (activePoint.node == rootIdx){
+					activePoint.edge = currentCharIdx - activePoint.remainder + 1;
+					activePoint.idx = activePoint.remainder - 1;
 			}
 
-			int newInnerNode = addNode(nodes[child].stringIdx, nodes[child].labelStartIdx, nodes[child].labelStartIdx + activePoint.idx);
-			nodes[activePoint.node].children[getActiveEdge()] = newInnerNode;
-			activePoint.remainder--;
-			int newLeaf = addLeaf(currentStringIdx, currentCharIdx, currentStringLength);
-			nodes[newInnerNode].children[c] = newLeaf;
-			nodes[child].labelStartIdx += activePoint.idx;
-			nodes[newInnerNode].children[strings[nodes[child].stringIdx][nodes[child].labelStartIdx]] = child;
-			setSuffixLink(newInnerNode);
+			int childID = nodes[activePoint.node].children[getActiveEdge()];
+			Node& child = nodes[childID];
+
+			if (walkDown(childID))
+				continue;
+
+
+			if (strings[child.stringIdx][child.labelStartIdx + activePoint.idx] == c) {
+				if (c != '$') {
+					activePoint.idx++;
+					setSuffixLink(activePoint.node);
+					break;
+				} else
+					child.addSuffix(currentStringIdx, currentCharIdx - (activePoint.remainder - 1));
+
+			} else {
+				int newInnerNode = addNode(child.stringIdx, child.labelStartIdx, child.labelStartIdx + activePoint.idx - 1);
+				nodes[activePoint.node].children[getActiveEdge()] = newInnerNode;
+				int newLeaf = addLeaf(currentStringIdx, currentCharIdx, currentStringLength - 1);
+				nodes[newInnerNode].children[c] = newLeaf;
+				child.labelStartIdx += activePoint.idx;
+				nodes[newInnerNode].children[strings[child.stringIdx][child.labelStartIdx]] = childID;
+				setSuffixLink(newInnerNode);
+			}
 		}
 
-		if (activePoint.node == root && activePoint.idx > 0) {
+		activePoint.remainder--;
+
+		if (activePoint.node == rootIdx && activePoint.idx > 0) {
 			activePoint.idx--;
 			activePoint.edge = currentCharIdx - activePoint.remainder + 1;
 		} else {
-			activePoint.node = nodes[activePoint.node].suffixLink > 0 ? nodes[activePoint.node].suffixLink : root;
+			activePoint.node = nodes[activePoint.node].suffixLink > 0 ? nodes[activePoint.node].suffixLink : rootIdx;
+
 		}
 	}
 }
 
 char GeneralizedSuffixTree::getActiveEdge() {
 	return strings[currentStringIdx][activePoint.edge];
+}
+
+Node GeneralizedSuffixTree::getActiveNode() {
+	return nodes[activePoint.node];
 }
 
 bool GeneralizedSuffixTree::walkDown(int node) {
@@ -127,18 +165,17 @@ bool GeneralizedSuffixTree::walkDown(int node) {
 }
 
 short GeneralizedSuffixTree::getlabelLength(int node) {
-	Node& n = nodes[node];
-	return n.labelEndIdx- n.labelStartIdx;
+	return nodes[node].getLabelLength();
 }
 
-int GeneralizedSuffixTree::addLeaf(int stringIdx, short labelStartIdx, short labelEndIn) {
-	nodes[currentNodeID] = *(new Node(stringIdx, labelStartIdx, labelEndIn));
-	nodes[currentNodeID].addSuffix(currentStringIdx, currentCharIdx - activePoint.remainder);
+int GeneralizedSuffixTree::addLeaf(int stringIdx, short labelStartIdx, short labelEndIdx) {
+	nodes[currentNodeID] = *(new Node(stringIdx, labelStartIdx, labelEndIdx));
+	nodes[currentNodeID].addSuffix(stringIdx, currentCharIdx - (activePoint.remainder - 1));
 	return currentNodeID++;
 }
 
-int GeneralizedSuffixTree::addNode(int stringIdx, short labelStartIdx, short labelEndIn) {
-	nodes[currentNodeID] = *(new Node(stringIdx, labelStartIdx, labelEndIn));
+int GeneralizedSuffixTree::addNode(int stringIdx, short labelStartIdx, short labelEndIdx) {
+	nodes[currentNodeID] = *(new Node(stringIdx, labelStartIdx, labelEndIdx));
 	return currentNodeID++;
 }
 
@@ -147,6 +184,13 @@ void GeneralizedSuffixTree::setSuffixLink(int node) {
 		nodes[lastInsertedNode].suffixLink = node;
 
 	lastInsertedNode = node;
+}
+
+char GeneralizedSuffixTree::getLastChar(int nodeID) {
+	return getLastChar(nodes[nodeID]);
+}
+char GeneralizedSuffixTree::getLastChar(Node& n) {
+	return strings[n.stringIdx][n.labelEndIdx];
 }
 
 void GeneralizedSuffixTree::exportInDotFormat(char* filename) {
@@ -164,19 +208,18 @@ void GeneralizedSuffixTree::exportInDotFormat(char* filename) {
 	GraphVizOutput << endl;
 	GraphVizOutput << endl;
 
-
 	GraphVizOutput << "digraph G {" << endl;
 	GraphVizOutput << "\trankdir=LR;" << endl;
 	GraphVizOutput << "\tnode[shape=circle, style=filled, fillcolor=white, width=0.05, fixedsize=true, label=\"\"]" << endl;
 	GraphVizOutput << endl;
 	GraphVizOutput << endl;
 
-//BFS
+	//BFV
 	queue<int> currentQueue;
 	queue<int> nextQueue;
-	nextQueue.push(root);
+	nextQueue.push(rootIdx);
 
-//Suffix links without suffix links
+	//Suffix links without suffix links
 	GraphVizOutput << "\t//Suffix tree without suffix links" << endl;
 	GraphVizOutput << "\tedge[arrowsize=0.4, fontsize=10, weight=3]" << endl;
 	while (not nextQueue.empty()) {
@@ -188,16 +231,13 @@ void GeneralizedSuffixTree::exportInDotFormat(char* filename) {
 			int currentNode = currentQueue.front();
 			currentQueue.pop();
 
-			if (nodes[currentNode].children.size() == 0)
-				continue;
-
 			for (unordered_map<char, int>::iterator childIt = nodes[currentNode].children.begin(); childIt != nodes[currentNode].children.end(); childIt++) {
 				GraphVizOutput << "\t";
 				GraphVizOutput << currentNode;
 				GraphVizOutput << " -> ";
 				GraphVizOutput << ((*childIt).second);
 				GraphVizOutput << " [label=\"";
-				GraphVizOutput << getEdgeString((*childIt).second);
+				GraphVizOutput << getEdgeStringWithTerm((*childIt).second, nodes[(*childIt).second].children.empty());
 				GraphVizOutput << "\"]" << endl;
 				nextQueue.push((*childIt).second);
 			}
@@ -224,6 +264,21 @@ void GeneralizedSuffixTree::exportInDotFormat(char* filename) {
 }
 
 string GeneralizedSuffixTree::getEdgeString(int node) {
-	return strings[nodes[node].stringIdx].substr(nodes[node].labelStartIdx, nodes[node].labelEndIdx - nodes[node].labelStartIdx);
+	return getEdgeStringWithTerm(nodes[node], true);
+}
+
+string GeneralizedSuffixTree::getEdgeString(Node& node) {
+	return getEdgeStringWithTerm(node, true);
+}
+
+string GeneralizedSuffixTree::getEdgeStringWithTerm(int node, bool withTerm) {
+	return getEdgeStringWithTerm(nodes[node], true);
+}
+
+string GeneralizedSuffixTree::getEdgeStringWithTerm(Node& node, bool withTerm) {
+	if (node.labelStartIdx == node.labelEndIdx)
+		return strings[node.stringIdx].substr(node.labelStartIdx, (withTerm ? 1 : 0));
+	else
+		return strings[node.stringIdx].substr(node.labelStartIdx, (node.labelEndIdx - node.labelStartIdx) + (withTerm ? 1 : 0));
 }
 

@@ -33,6 +33,7 @@ public:
 
 	typedef pair<int,short> suffix;
 	void addSuffix(int stringIdx, short suffixIdx);
+	short getLabelLength();
 
 	//Label is extracted from string in this way: [labelStartIdx,labelEndInx)
 	int stringIdx = -1;
