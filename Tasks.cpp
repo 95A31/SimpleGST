@@ -3,7 +3,7 @@
  * 	
  *     This file is part of SimpleGST.
  *
- *     GeneralizedSuffixTree is free software: you can redistribute it and/or modify
+ *     SimpleGST is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
@@ -33,34 +33,6 @@ Tasks::~Tasks() {
 	// TODO Auto-generated destructor stub
 }
 
-void Tasks::deepFirtVisit(Node& n, short currentMatchIdx, short allowedMissMatches, string& s) {
-	for (unordered_map<char, int>::iterator childIt = n.children.begin(); childIt != n.children.end(); childIt++) {
-		Node child = gst->nodes[(*childIt).second];
-
-		short trimmedLength = -1;
-		//Children = XXXX$
-		if (child.children.empty() and gst->getEdgeStringWithTerm(n, false).compare(s.substr(currentMatchIdx, child.getLabelLength() - 1)) == 0)
-			trimmedLength = child.labelEndIdx - currentMatchIdx;
-
-		//Children = $
-		else if (child.getLabelLength() == 1 && gst->strings[n.stringIdx][n.labelEndIdx] == '$')
-			trimmedLength = n.labelEndIdx - currentMatchIdx;
-
-		if (trimmedLength > 0) {
-			if (resultsT1.count(trimmedLength) > 0)
-				resultsT1[trimmedLength]++;
-			else
-				resultsT1[trimmedLength] = 1;
-
-			continue;
-		}
-
-		if (gst->getEdgeString(child).compare(s.substr(currentMatchIdx, child.getLabelLength() - 1)) == 0) {
-			currentMatchIdx += n.getLabelLength();
-			deepFirtVisit(gst->nodes[(*childIt).second], currentMatchIdx, allowedMissMatches, s);
-		}
-	}
-}
 void Tasks::Task1() {
 	string adapter = "TGGAATTCTCGGGTGCCAAGGAACTCCAGTCACACAGTGATCTCGTATGCCGTCTTCTGCTTG$";
 
@@ -107,17 +79,4 @@ void Tasks::addToResultsT1(Node* n, short adapterIdx) {
 
 void Tasks::addToResultsT1(int nodeID, short adapterLength) {
 	addToResultsT1(&gst->nodes[nodeID], adapterLength);
-}
-
-void Tasks::Task2() {
-	string adapter = "trrrr$";
-
-	Node root = gst->nodes[gst->rootIdx];
-
-	deepFirtVisit(gst->nodes[gst->rootIdx], 0, 0, adapter);
-
-	cout << "Task 1:" << endl;
-	cout << " Length\tCount" << endl;
-	for (unordered_map<short, int>::iterator resIt = resultsT1.begin(); resIt != resultsT1.end(); resIt++)
-		cout << " " << (*resIt).first << "\t" << (*resIt).second << endl;
 }
