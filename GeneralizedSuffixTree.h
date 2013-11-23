@@ -22,7 +22,7 @@
 
 #include <vector>
 #include <string>
-#include <unordered_map>
+#include <vector>
 
 #include "ActivePoint.h"
 #include "Node.h"
@@ -32,24 +32,26 @@ using namespace std;
 class GeneralizedSuffixTree {
 
 public:
-	GeneralizedSuffixTree(vector<string>& strings);
 	GeneralizedSuffixTree(string s);
+	GeneralizedSuffixTree(vector<string>& strings);
 	virtual ~GeneralizedSuffixTree();
-	void exportInDotFormat(char* fileName);
+
+
 	int addString(string& s);
+	void exportInDotFormat(char* fileName);
+
+	char getLastChar(Node& n);
+	string getEdgeString(Node& node);
+	string getEdgeStringWithTerm(Node& node, bool withTerm);
 
 	int lastInsertedNode = -1;
 	int currentStringIdx = -1;
 	short currentCharIdx = -1;
-	int rootIdx;
+
 	vector<string> strings;
+	int rootIdx;
 	unordered_map<int, Node> nodes;
-	string getEdgeString(int node);
-	string getEdgeString(Node& node);
-	string getEdgeStringWithTerm(Node& node, bool withTerm);
-	char getLastChar(int node);
-	char getLastChar(Node& n);
-	string getEdgeStringWithTerm(int node, bool withTerm);
+
 
 private:
 
@@ -59,10 +61,9 @@ private:
 	void addNextString();
 	void extend();
 
-	char getTreeActiveEdge();
+
 	char getActiveEdge();
 	Node getActiveNode();
-	short getlabelLength(int node);
 
 	bool walkDown(int node);
 
@@ -71,9 +72,8 @@ private:
 
 	void setSuffixLink(int node);
 
-	int currentNodeID = -1;
-
 	ActivePoint activePoint;
+	int currentNodeID = -1;
 	short currentStringLength = -1;
 
 };

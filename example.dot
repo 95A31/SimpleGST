@@ -15,53 +15,70 @@ digraph G {
 
 	//Suffix tree without suffix links
 	edge[arrowsize=0.4, fontsize=10, weight=3]
-	0 -> 18 [label="$"]
-	0 -> 19 [label="m"]
-	0 -> 8 [label="s"]
-	0 -> 3 [label="p"]
-	0 -> 5 [label="i"]
-	19 -> 17 [label="$"]
-	19 -> 20 [label="ississippi$"]
-	8 -> 12 [label="si"]
-	8 -> 14 [label="i"]
-	3 -> 32 [label="pi"]
-	3 -> 34 [label="i"]
-	5 -> 36 [label="$"]
-	5 -> 16 [label="m$"]
-	5 -> 30 [label="ppi"]
-	5 -> 10 [label="ssi"]
-	12 -> 28 [label="ppi$"]
-	12 -> 23 [label="ssi"]
-	12 -> 13 [label="m$"]
-	14 -> 29 [label="ppi$"]
-	14 -> 25 [label="ssi"]
-	14 -> 15 [label="m$"]
-	32 -> 2 [label="ssissim$"]
-	32 -> 33 [label="$"]
-	34 -> 4 [label="ssissim$"]
-	34 -> 35 [label="$"]
-	30 -> 1 [label="ssissim$"]
-	30 -> 31 [label="$"]
-	10 -> 27 [label="ppi$"]
-	10 -> 21 [label="ssi"]
-	10 -> 11 [label="m$"]
-	23 -> 7 [label="m$"]
-	23 -> 24 [label="ppi$"]
-	25 -> 9 [label="m$"]
-	25 -> 26 [label="ppi$"]
-	21 -> 6 [label="m$"]
-	21 -> 22 [label="ppi$"]
+	0 -> 42 [label="t$"]
+	0 -> 43 [label="$"]
+	0 -> 40 [label="q"]
+	40 -> 38 [label="q"]
+	40 -> 41 [label="t$"]
+	38 -> 36 [label="q"]
+	38 -> 39 [label="t$"]
+	36 -> 34 [label="q"]
+	36 -> 37 [label="t$"]
+	34 -> 32 [label="q"]
+	34 -> 35 [label="t$"]
+	32 -> 30 [label="q"]
+	32 -> 33 [label="t$"]
+	30 -> 28 [label="q"]
+	30 -> 31 [label="t$"]
+	28 -> 26 [label="q"]
+	28 -> 29 [label="t$"]
+	26 -> 24 [label="q"]
+	26 -> 27 [label="t$"]
+	24 -> 22 [label="q"]
+	24 -> 25 [label="t$"]
+	22 -> 20 [label="q"]
+	22 -> 23 [label="t$"]
+	20 -> 18 [label="q"]
+	20 -> 21 [label="t$"]
+	18 -> 16 [label="q"]
+	18 -> 19 [label="t$"]
+	16 -> 14 [label="q"]
+	16 -> 17 [label="t$"]
+	14 -> 12 [label="q"]
+	14 -> 15 [label="t$"]
+	12 -> 10 [label="q"]
+	12 -> 13 [label="t$"]
+	10 -> 8 [label="q"]
+	10 -> 11 [label="t$"]
+	8 -> 6 [label="q"]
+	8 -> 9 [label="t$"]
+	6 -> 4 [label="q"]
+	6 -> 7 [label="t$"]
+	4 -> 2 [label="q"]
+	4 -> 5 [label="t$"]
+	2 -> 1 [label="qt$"]
+	2 -> 3 [label="t$"]
 
 
 	//Suffix  links
 	edge[arrowsize=0.4,fontsize=10, style=dashed, weight=1]
-	34 -> 5
+	38 -> 40
+	36 -> 38
+	34 -> 36
 	32 -> 34
 	30 -> 32
-	25 -> 10
-	23 -> 25
+	28 -> 30
+	26 -> 28
+	24 -> 26
+	22 -> 24
+	8 -> 10
+	6 -> 8
+	4 -> 6
+	2 -> 4
 	10 -> 12
 	12 -> 14
-	14 -> 5
-	21 -> 23
+	14 -> 16
+	16 -> 18
+	18 -> 20
+	20 -> 22
 }

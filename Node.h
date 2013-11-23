@@ -27,11 +27,13 @@ using namespace std;
 
 class Node {
 public:
+
+	typedef pair<int,short> suffix;	//<StringIdx, Offset>
+
 	Node();
 	Node(int stringIdx, short labelStartIdx, short labelEndInx);
 	virtual ~Node();
 
-	typedef pair<int,short> suffix;
 	void addSuffix(int stringIdx, short suffixIdx);
 	short getLabelLength();
 

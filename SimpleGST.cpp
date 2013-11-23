@@ -21,30 +21,39 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <chrono>
 
 #include "GeneralizedSuffixTree.h"
 #include "Tasks.h"
 
 using namespace std;
 
+void printHelp() {
+	cerr << "Too few arguments.\n";
+	cerr << "Example of usage: SimpleGST input.txt\n";
+	cerr << "Example of usage: SimpleGST input.txt output.dot\n";
+}
+
+void printHeader() {
+	cout << " Welcome to SimpleGST, a Simple C++ implementation of Generalized Suffix Tree" << endl;
+	cout << " Copyright (c) 95A31" << endl;
+	cout << " Source: https://github.com/95A31/SimpleGST" << endl;
+}
+
 int main(int argc, char *argv[]) {
 
 	if (argc < 2) {
-		cerr << "Too few arguments.\n";
-		cerr << "Example of usage: SimpleGST input.txt\n";
-		cerr << "Example of usage: SimpleGST input.txt output.dot\n";
-		return -1;
+		printHelp();
+		return EXIT_FAILURE;
 	}
-	cout << "*******************************************************************************" << endl;
-	cout << "* Welcome to SimpleGST, a Simple C++ implementation of Generalized Suffix Tree" << endl;
-	cout << "* Copyright (c) 95A31" << endl;
-	cout << "* Source: https://github.com/95A31/SimpleGST" << endl;
-	cout << "*******************************************************************************" << endl;
 
-	ifstream readsFile(argv[1]);
+	printHeader();
+
+	//Read input file line by line
+	ifstream stringsFile(argv[1]);
 	vector<string> reads;
 	string read;
-	while (getline(readsFile, read))
+	while (getline(stringsFile, read))
 		reads.push_back(read);
 
 	GeneralizedSuffixTree gst(reads);
@@ -52,9 +61,16 @@ int main(int argc, char *argv[]) {
 	if (argc == 2) {
 		Tasks t(&gst);
 		t.Task1();
+		t.Task2();
+		t.Task3();
+		t.Task4();
 	} else if (argc == 3) {
 		gst.exportInDotFormat(argv[2]);
+	} else {
+		printHelp();
+		return EXIT_FAILURE;
 	}
 
-	return 0;
+	return EXIT_SUCCESS;
 }
+
