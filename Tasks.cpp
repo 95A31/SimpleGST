@@ -311,7 +311,6 @@ void Tasks::Task4() {
 
 	vector<string> ss;
 
-	int i = 0;
 	for (pair<int, set<short>> entry : auxStruct2T3)
 		for (short length : entry.second)
 			ss.push_back(gst->strings[entry.first].substr(0, length));
