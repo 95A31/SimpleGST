@@ -64,7 +64,8 @@ public:
 
 	void Task4();
 	void addToResultsT4(Node* n);
-	void addToResultsT4(string label, Node* n);
+	void addToResultsT4(Node* n, short maxNumOfSeqs);
+	void addToResultsT4(Node* n, short maxNumOfSeqs, string label);
 	void collectDuplicates(Node* currentNode);
 	void searchWithMissmatchesAndSave(short currentCharIdx, short currentErr, Node* currentNode);
 	void findSharedPrefix(string label, short labelLength, Node* currentNode);

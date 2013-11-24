@@ -51,7 +51,7 @@ GeneralizedSuffixTree::GeneralizedSuffixTree(vector<string>& strings) {
 	}
 
 	auto t2 = chrono::high_resolution_clock::now();
-	auto elapsed = chrono::duration_cast<std::chrono::milliseconds>(t1 - t2);
+	auto elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
 	cout << "Adding string " << currentStringIdx - 1 << " [OK] (" << elapsed.count() << " ms)" << endl;
 }

@@ -37,7 +37,6 @@ Tasks::~Tasks() {
 	// TODO Auto-generated destructor stub
 }
 
-
 void Tasks::Task1() {
 	cout << endl << endl;
 
@@ -48,7 +47,7 @@ void Tasks::Task1() {
 	trimAndLengthDist();
 
 	auto t2 = chrono::high_resolution_clock::now();
-	auto elapsed = chrono::duration_cast<std::chrono::milliseconds>(t1 - t2);
+	auto elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
 	cout << "Task 1: (" << elapsed.count() << " ms)" << endl;
 	cout << " Length\tCount" << endl;
@@ -95,7 +94,6 @@ void Tasks::addToResultsT1T2(Node* n) {
 	}
 }
 
-
 void Tasks::Task2() {
 	cout << endl << endl;
 
@@ -104,10 +102,10 @@ void Tasks::Task2() {
 	//10% -> 5
 	auto t1 = chrono::high_resolution_clock::now();
 
-	searchWithMissmatchesAndSave(0, 5, &gst->nodes[gst->rootIdx]);
+	searchWithMissmatches(0, 5, &gst->nodes[gst->rootIdx]);
 
 	auto t2 = chrono::high_resolution_clock::now();
-	auto elapsed = chrono::duration_cast<std::chrono::milliseconds>(t1 - t2);
+	auto elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
 	cout << "Task 2a: (" << elapsed.count() << " ms)" << endl;
 	cout << " Length\tCount" << endl;
@@ -119,10 +117,10 @@ void Tasks::Task2() {
 	//25% -> 13
 	t1 = chrono::high_resolution_clock::now();
 
-	searchWithMissmatchesAndSave(0, 13, &gst->nodes[gst->rootIdx]);
+	searchWithMissmatches(0, 13, &gst->nodes[gst->rootIdx]);
 
 	t2 = chrono::high_resolution_clock::now();
-	elapsed = chrono::duration_cast<std::chrono::milliseconds>(t1 - t2);
+	elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
 	cout << "Task 2b: (" << elapsed.count() << " ms)" << endl;
 	cout << " Length\tCount" << endl;
@@ -180,7 +178,6 @@ short Tasks::countMismatches(int childrenStringIdx, short childrenLabelStartIdx,
 	return numOfMismatches;
 }
 
-
 void Tasks::Task3() {
 	cout << endl << endl;
 
@@ -189,7 +186,7 @@ void Tasks::Task3() {
 	collectMostFrequenSuffixes("", &gst->nodes[gst->rootIdx]);
 
 	auto t2 = chrono::high_resolution_clock::now();
-	auto elapsed = chrono::duration_cast<std::chrono::milliseconds>(t1 - t2);
+	auto elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
 	cout << "Task 3a: The strings are reversed! (" << elapsed.count() << " ms)" << endl;
 	cout << "Multiplicity String" << endl;
@@ -208,7 +205,7 @@ void Tasks::Task3() {
 	trimAndSave();
 
 	t2 = chrono::high_resolution_clock::now();
-	elapsed = chrono::duration_cast<std::chrono::milliseconds>(t1 - t2);
+	elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
 	cout << endl;
 	cout << "Task 3b: (" << elapsed.count() << " ms)" << endl;
@@ -309,12 +306,12 @@ void Tasks::trimAndSave() {
 	}
 }
 
-
 void Tasks::Task4() {
 	cout << endl << endl;
 
 	vector<string> ss;
 
+	int i = 0;
 	for (pair<int, set<short>> entry : auxStruct2T3)
 		for (short length : entry.second)
 			ss.push_back(gst->strings[entry.first].substr(0, length));
@@ -331,7 +328,7 @@ void Tasks::Task4() {
 	collectDuplicates(&auxGst->nodes[gst->rootIdx]);
 
 	auto t2 = chrono::high_resolution_clock::now();
-	auto elapsed = chrono::duration_cast<std::chrono::milliseconds>(t1 - t2);
+	auto elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
 	cout << "Task 4a: (" << elapsed.count() << " ms)" << endl;
 	cout << "Multiplicity String" << endl;
@@ -352,7 +349,7 @@ void Tasks::Task4() {
 	}
 
 	t2 = chrono::high_resolution_clock::now();
-	elapsed = chrono::duration_cast<std::chrono::milliseconds>(t1 - t2);
+	elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
 	cout << "Task 4b: (" << elapsed.count() << " ms)" << endl;
 	cout << "Multiplicity String" << endl;
@@ -373,7 +370,7 @@ void Tasks::Task4() {
 	}
 
 	t2 = chrono::high_resolution_clock::now();
-	elapsed = chrono::duration_cast<std::chrono::milliseconds>(t1 - t2);
+	elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
 	cout << "Task 4c: (" << elapsed.count() << " ms)" << endl;
 	cout << "Multiplicity String" << endl;
@@ -428,16 +425,50 @@ void Tasks::addToResultsT4(Node* n) {
 
 	int multiplicity = n->suffixes.size();
 
+	string label = adapter;
+	label.pop_back();
+
+	if (resultsT3.count(label) > 0)
+		resultsT3[label] += multiplicity;
+	else if (counter + 1 <= MAX_DUPLICATES_MISSMATCH) {
+		auxStructT3[multiplicity].insert(label);
+
+		resultsT3[label] += multiplicity;
+		counter++;
+	} else if (auxStructT3.begin()->first < multiplicity) {
+		resultsT3.erase(*--auxStructT3.begin()->second.end());
+
+		if (auxStructT3.begin()->second.size() == 1)
+			auxStructT3.erase(auxStructT3.begin());
+		else
+			auxStructT3.begin()->second.erase(--auxStructT3.begin()->second.end());
+
+		auxStructT3[multiplicity].insert(label);
+
+		resultsT3[label] = multiplicity;
+		counter++;
+	}
+}
+
+void Tasks::addToResultsT4(Node* n, short maxNumOfSeqs) {
+	int multiplicity = n->suffixes.size();
+
+	int stringIdx = -1;
+
 	for (auto suffix : n->suffixes) {
 		if (suffix.second > 0)
 			multiplicity--;
+		else
+			stringIdx = suffix.first;
 	}
 
 	if (multiplicity > 1) {
-		string label = adapter;
-		label.pop_back();
 
-		if (counter + 1 <= MAX_DUPLICATES_MISSMATCH) {
+		string label = auxGst->strings[stringIdx];
+		label.pop_back();
+		if (resultsT3.count(label) > 0)
+			resultsT3[label] += multiplicity;
+		else if (counter + 1 <= maxNumOfSeqs) {
 			auxStructT3[multiplicity].insert(label);
 
 			resultsT3[label] = multiplicity;
@@ -458,17 +489,18 @@ void Tasks::addToResultsT4(Node* n) {
 	}
 }
 
-void Tasks::addToResultsT4(string label, Node* n) {
+void Tasks::addToResultsT4(Node* n, short maxNumOfSeqs, string label) {
 	int multiplicity = n->suffixes.size();
 
-	for (auto suffix : n->suffixes) {
+	for (auto suffix : n->suffixes)
 		if (suffix.second > 0)
 			multiplicity--;
-	}
 
 	if (multiplicity > 1) {
 
-		if (counter + 1 <= MAX_DUPLICATES_COMM_PREFIX) {
+		label.pop_back();
+
+		if (counter + 1 <= maxNumOfSeqs) {
 			auxStructT3[multiplicity].insert(label);
 
 			resultsT3[label] = multiplicity;
@@ -493,7 +525,7 @@ void Tasks::collectDuplicates(Node* currentNode) {
 
 	//Deep First Visit
 	if (currentNode->children.empty()) {
-		addToResultsT3(currentNode);
+		addToResultsT4(currentNode, MAX_DUPLICATES);
 		return;
 	}
 
@@ -517,31 +549,26 @@ void Tasks::searchWithMissmatchesAndSave(short currentCharIdx, short currentErr,
 
 	for (pair<char, int> childEntry : currentNode->children) {
 
-		Node* child = &gst->nodes[childEntry.second];
+		Node* child = &auxGst->nodes[childEntry.second];
 
-		if (currentNode->children.count('$') > 0 and currentNode != &gst->nodes[gst->rootIdx])
-			addToResultsT4(&gst->nodes[currentNode->children['$']]);
+		if (currentNode->children.count('$') > 0)
+			addToResultsT4(&auxGst->nodes[currentNode->children['$']]);
 
 		short numOfMismatches = countMismatches(child->stringIdx, child->labelStartIdx, child->labelEndIdx, currentCharIdx);
 
-		if (numOfMismatches > currentErr or numOfMismatches == -2) {
+		if (numOfMismatches > currentErr or numOfMismatches < 0)
 			continue;
-		} else if (numOfMismatches == -1 and child->getLabelLength() > 1) {
-			addToResultsT4(child);
-			continue;
-		}
 
 		searchWithMissmatchesAndSave(currentCharIdx + child->getLabelLength(), currentErr - numOfMismatches, child);
 	}
-
 	return;
 }
 
 void Tasks::findSharedPrefix(string label, short labelLength, Node* currentNode) {
 
 	//Deep First Visit
-	if (currentNode->children.empty()) {
-		addToResultsT4(label, currentNode);
+	if (currentNode->children.empty() and (short) label.length() == labelLength) {
+		addToResultsT4(currentNode, MAX_DUPLICATES_COMM_PREFIX, label);
 		return;
 	}
 
@@ -549,18 +576,14 @@ void Tasks::findSharedPrefix(string label, short labelLength, Node* currentNode)
 
 	for (char c : alphabetSimbols) {
 		if (currentNode->children.count(c) > 0) {
-			Node * child = &gst->nodes[currentNode->children[c]];
+			Node * child = &auxGst->nodes[currentNode->children[c]];
 			string childLabel = label;
 			if ((short) childLabel.length() < labelLength) {
-				childLabel.append(gst->getEdgeString(*child));
-				childLabel.resize(labelLength);
+				childLabel.append(auxGst->getEdgeString(*child));
+				childLabel = childLabel.substr(0,labelLength);
 			}
 			findSharedPrefix(childLabel, labelLength, child);
 		}
 	}
-
-	return;
 }
-
-
 
