@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <vector>
 #include <chrono>
+#include <omp.h>
 
 using namespace std;
 
@@ -145,9 +146,9 @@ void Tasks::searchWithMissmatches(short currentCharIdx, short currentErr, Node* 
 
 		short numOfMismatches = countMismatches(child->stringIdx, child->labelStartIdx, child->labelEndIdx, currentCharIdx);
 
-		if (numOfMismatches > currentErr or numOfMismatches == -2) {
+		if (numOfMismatches > currentErr or numOfMismatches == -2)
 			continue;
-		} else if (numOfMismatches == -1 and child->getLabelLength() > 1) {
+		else if (numOfMismatches == -1 and adapter[currentCharIdx] == '$') {
 			addToResultsT1T2(child);
 			continue;
 		}
@@ -546,40 +547,59 @@ void Tasks::searchWithMissmatchesAndSave(short currentCharIdx, short currentErr,
 	if (currentCharIdx >= (short) adapter.length())
 		return;
 
-	for (pair<char, int> childEntry : currentNode->children) {
+	string alphabetSimbols = "$ACGT";
 
-		Node* child = &auxGst->nodes[childEntry.second];
+#pragma omp parallel for
+	for (short i = 0; i < (short) alphabetSimbols.length(); i++) {
 
-		if (currentNode->children.count('$') > 0)
-			addToResultsT4(&auxGst->nodes[currentNode->children['$']]);
+		char c = alphabetSimbols[i];
+		if (currentNode->children.count(c) > 0) {
+			Node* child = &auxGst->nodes[currentNode->children[c]];
 
-		short numOfMismatches = countMismatches(child->stringIdx, child->labelStartIdx, child->labelEndIdx, currentCharIdx);
+			if (currentNode->children.count('$') > 0)
+#pragma omp critical (T4bc)
+				addToResultsT4(&auxGst->nodes[currentNode->children['$']]);
 
-		if (numOfMismatches > currentErr or numOfMismatches < 0)
-			continue;
+			short numOfMismatches = countMismatches(child->stringIdx, child->labelStartIdx, child->labelEndIdx, currentCharIdx);
 
-		searchWithMissmatchesAndSave(currentCharIdx + child->getLabelLength(), currentErr - numOfMismatches, child);
+			if (numOfMismatches > currentErr or numOfMismatches == -2)
+				continue;
+			else if (numOfMismatches == -1 and adapter[currentCharIdx] == '$') {
+#pragma omp critical (T4bc)
+				addToResultsT4(child);
+				continue;
+			}
+
+			searchWithMissmatchesAndSave(currentCharIdx + child->getLabelLength(), currentErr - numOfMismatches, child);
+		}
 	}
+
 	return;
 }
 
 void Tasks::findSharedPrefix(string label, short labelLength, Node* currentNode) {
 
-	//Deep First Visit
+//Deep First Visit
 	if (currentNode->children.empty() and (short) label.length() == labelLength) {
+#pragma omp critical (T4def)
 		addToResultsT4(currentNode, MAX_DUPLICATES_COMM_PREFIX, label);
 		return;
 	}
 
 	string alphabetSimbols = "$ACGT";
 
-	for (char c : alphabetSimbols) {
+#pragma omp parallel for
+
+	for (short i = 0; i < (short) alphabetSimbols.length(); i++) {
+
+		char c = alphabetSimbols[i];
 		if (currentNode->children.count(c) > 0) {
-			Node * child = &auxGst->nodes[currentNode->children[c]];
+			Node* child = &auxGst->nodes[currentNode->children[c]];
+
 			string childLabel = label;
 			if ((short) childLabel.length() < labelLength) {
 				childLabel.append(auxGst->getEdgeString(*child));
-				childLabel = childLabel.substr(0,labelLength);
+				childLabel = childLabel.substr(0, labelLength);
 			}
 			findSharedPrefix(childLabel, labelLength, child);
 		}
