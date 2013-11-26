@@ -45,7 +45,8 @@ GeneralizedSuffixTree::GeneralizedSuffixTree(vector<string>& strings) {
 	auto t1 = chrono::high_resolution_clock::now();
 
 	for (int i = 0; i < (int) strings.size(); i++) {
-		cout << "Adding string " << currentStringIdx << "\r";
+		if (i % 1000 == 0)
+			cout << "Adding string " << currentStringIdx << "\r";
 		clearStringInfo();
 		addNextString();
 	}

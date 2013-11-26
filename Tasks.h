@@ -21,13 +21,12 @@
 #define TASKS_H_
 
 #include <map>
-#include <climits>
 #include <set>
 
 #include "GeneralizedSuffixTree.h"
 #include "Node.h"
 
-#define MAX_SUFFIXES 10000
+#define MAX_SUFFIXES 100
 #define MAX_DUPLICATES 10
 #define MAX_DUPLICATES_MISSMATCH 10
 #define MAX_DUPLICATES_COMM_PREFIX 10
@@ -63,11 +62,10 @@ public:
 	void trimAndSave();
 
 	void Task4();
-	void addToResultsT4(Node* n);
 	void addToResultsT4(Node* n, short maxNumOfSeqs);
-	void addToResultsT4(Node* n, short maxNumOfSeqs, string label);
+	void addToResultsT4(Node* n, int maxNumOfSeqs, string label);
 	void collectDuplicates(Node* currentNode);
-	void searchWithMissmatchesAndSave(short currentCharIdx, short currentErr, Node* currentNode);
+	void searchWithMissmatchesAndSave(short currentCharIdx, short currentErr, Node* currentNode, string& label);
 	void findSharedPrefix(string label, short labelLength, Node* currentNode);
 
 

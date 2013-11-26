@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <vector>
 #include <chrono>
+#include <climits>
 #include <omp.h>
 
 using namespace std;
@@ -343,10 +344,10 @@ void Tasks::Task4() {
 	t1 = chrono::high_resolution_clock::now();
 
 	//10% => 5
-	for (string s : auxGst->strings) {
-		adapter = s;
-		searchWithMissmatchesAndSave(0, 5, &auxGst->nodes[auxGst->rootIdx]);
-	}
+#pragma omp parallel
+	for (int i = 0; i < (int) auxGst->strings.size(); i++)
+		searchWithMissmatchesAndSave(0, 5, &auxGst->nodes[auxGst->rootIdx],auxGst->strings[i]);
+
 
 	t2 = chrono::high_resolution_clock::now();
 	elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
@@ -364,10 +365,10 @@ void Tasks::Task4() {
 	t1 = chrono::high_resolution_clock::now();
 
 	//20% => 10
-	for (string s : auxGst->strings) {
-		adapter = s;
-		searchWithMissmatchesAndSave(0, 10, &auxGst->nodes[auxGst->rootIdx]);
-	}
+#pragma omp parallel
+	for (int i = 0; i < (int) auxGst->strings.size(); i++)
+		searchWithMissmatchesAndSave(0, 10, &auxGst->nodes[auxGst->rootIdx],auxGst->strings[i]);
+
 
 	t2 = chrono::high_resolution_clock::now();
 	elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
@@ -421,35 +422,6 @@ void Tasks::Task4() {
 	cout << endl;
 }
 
-void Tasks::addToResultsT4(Node* n) {
-
-	int multiplicity = n->suffixes.size();
-
-	string label = adapter;
-	label.pop_back();
-
-	if (resultsT3.count(label) > 0)
-		resultsT3[label] += multiplicity;
-	else if (counter + 1 <= MAX_DUPLICATES_MISSMATCH) {
-		auxStructT3[multiplicity].insert(label);
-
-		resultsT3[label] += multiplicity;
-		counter++;
-	} else if (auxStructT3.begin()->first < multiplicity) {
-		resultsT3.erase(*--auxStructT3.begin()->second.end());
-
-		if (auxStructT3.begin()->second.size() == 1)
-			auxStructT3.erase(auxStructT3.begin());
-		else
-			auxStructT3.begin()->second.erase(--auxStructT3.begin()->second.end());
-
-		auxStructT3[multiplicity].insert(label);
-
-		resultsT3[label] = multiplicity;
-		counter++;
-	}
-}
-
 void Tasks::addToResultsT4(Node* n, short maxNumOfSeqs) {
 	int multiplicity = n->suffixes.size();
 
@@ -462,61 +434,67 @@ void Tasks::addToResultsT4(Node* n, short maxNumOfSeqs) {
 			stringIdx = suffix.first;
 	}
 
-	if (multiplicity > 1) {
+#pragma omp critical (results3)
+	{
+		if (multiplicity > 1) {
 
-		string label = auxGst->strings[stringIdx];
-		label.pop_back();
-		if (resultsT3.count(label) > 0)
-			resultsT3[label] += multiplicity;
-		else if (counter + 1 <= maxNumOfSeqs) {
-			auxStructT3[multiplicity].insert(label);
+			string label = auxGst->strings[stringIdx];
+			label.pop_back();
+			if (resultsT3.count(label) > 0)
+				resultsT3[label] += multiplicity;
+			else if (counter + 1 <= maxNumOfSeqs) {
+				auxStructT3[multiplicity].insert(label);
 
-			resultsT3[label] = multiplicity;
-			counter++;
-		} else if (auxStructT3.begin()->first < multiplicity) {
-			resultsT3.erase(*--auxStructT3.begin()->second.end());
+				resultsT3[label] = multiplicity;
+				counter++;
+			} else if (auxStructT3.begin()->first < multiplicity) {
+				resultsT3.erase(*--auxStructT3.begin()->second.end());
 
-			if (auxStructT3.begin()->second.size() == 1)
-				auxStructT3.erase(auxStructT3.begin());
-			else
-				auxStructT3.begin()->second.erase(--auxStructT3.begin()->second.end());
+				if (auxStructT3.begin()->second.size() == 1)
+					auxStructT3.erase(auxStructT3.begin());
+				else
+					auxStructT3.begin()->second.erase(--auxStructT3.begin()->second.end());
 
-			auxStructT3[multiplicity].insert(label);
+				auxStructT3[multiplicity].insert(label);
 
-			resultsT3[label] = multiplicity;
-			counter++;
+				resultsT3[label] = multiplicity;
+				counter++;
+			}
 		}
 	}
 }
 
-void Tasks::addToResultsT4(Node* n, short maxNumOfSeqs, string label) {
+void Tasks::addToResultsT4(Node* n, int maxNumOfSeqs, string label) {
 	int multiplicity = n->suffixes.size();
 
 	for (auto suffix : n->suffixes)
 		if (suffix.second > 0)
 			multiplicity--;
 
-	if (multiplicity > 1) {
+#pragma omp critical (results3)
+	{
+		if (multiplicity > 1) {
 
-		label.pop_back();
+			label.pop_back();
 
-		if (counter + 1 <= maxNumOfSeqs) {
-			auxStructT3[multiplicity].insert(label);
+			if (counter + 1 <= maxNumOfSeqs) {
+				auxStructT3[multiplicity].insert(label);
 
-			resultsT3[label] = multiplicity;
-			counter++;
-		} else if (auxStructT3.begin()->first < multiplicity) {
-			resultsT3.erase(*--auxStructT3.begin()->second.end());
+				resultsT3[label] = multiplicity;
+				counter++;
+			} else if (auxStructT3.begin()->first < multiplicity) {
+				resultsT3.erase(*--auxStructT3.begin()->second.end());
 
-			if (auxStructT3.begin()->second.size() == 1)
-				auxStructT3.erase(auxStructT3.begin());
-			else
-				auxStructT3.begin()->second.erase(--auxStructT3.begin()->second.end());
+				if (auxStructT3.begin()->second.size() == 1)
+					auxStructT3.erase(auxStructT3.begin());
+				else
+					auxStructT3.begin()->second.erase(*--auxStructT3.begin()->second.end());
 
-			auxStructT3[multiplicity].insert(label);
+				auxStructT3[multiplicity].insert(label);
 
-			resultsT3[label] = multiplicity;
-			counter++;
+				resultsT3[label] = multiplicity;
+				counter++;
+			}
 		}
 	}
 }
@@ -541,36 +519,31 @@ void Tasks::collectDuplicates(Node* currentNode) {
 	return;
 }
 
-void Tasks::searchWithMissmatchesAndSave(short currentCharIdx, short currentErr, Node* currentNode) {
+void Tasks::searchWithMissmatchesAndSave(short currentCharIdx, short currentErr, Node* currentNode, string& label) {
 
 	//Deep First Visit
-	if (currentCharIdx >= (short) adapter.length())
+	if (currentCharIdx >= (short) label.length())
 		return;
 
 	string alphabetSimbols = "$ACGT";
 
-#pragma omp parallel for
-	for (short i = 0; i < (short) alphabetSimbols.length(); i++) {
-
-		char c = alphabetSimbols[i];
+	for (char c : alphabetSimbols) {
 		if (currentNode->children.count(c) > 0) {
 			Node* child = &auxGst->nodes[currentNode->children[c]];
 
 			if (currentNode->children.count('$') > 0)
-#pragma omp critical (T4bc)
-				addToResultsT4(&auxGst->nodes[currentNode->children['$']]);
+				addToResultsT4(&auxGst->nodes[currentNode->children['$']], INT_MAX, label);
 
 			short numOfMismatches = countMismatches(child->stringIdx, child->labelStartIdx, child->labelEndIdx, currentCharIdx);
 
 			if (numOfMismatches > currentErr or numOfMismatches == -2)
 				continue;
-			else if (numOfMismatches == -1 and adapter[currentCharIdx] == '$') {
-#pragma omp critical (T4bc)
-				addToResultsT4(child);
+			else if (numOfMismatches == -1 and label[currentCharIdx] == '$') {
+				addToResultsT4(child, INT_MAX, label);
 				continue;
 			}
 
-			searchWithMissmatchesAndSave(currentCharIdx + child->getLabelLength(), currentErr - numOfMismatches, child);
+			searchWithMissmatchesAndSave(currentCharIdx + child->getLabelLength(), currentErr - numOfMismatches, child, label);
 		}
 	}
 
@@ -580,16 +553,14 @@ void Tasks::searchWithMissmatchesAndSave(short currentCharIdx, short currentErr,
 void Tasks::findSharedPrefix(string label, short labelLength, Node* currentNode) {
 
 //Deep First Visit
-	if (currentNode->children.empty() and (short) label.length() == labelLength) {
-#pragma omp critical (T4def)
+	if (currentNode->children.empty()) {
 		addToResultsT4(currentNode, MAX_DUPLICATES_COMM_PREFIX, label);
 		return;
 	}
 
 	string alphabetSimbols = "$ACGT";
 
-#pragma omp parallel for
-
+#pragma omp parallel
 	for (short i = 0; i < (short) alphabetSimbols.length(); i++) {
 
 		char c = alphabetSimbols[i];
