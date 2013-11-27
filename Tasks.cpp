@@ -375,8 +375,7 @@ void Tasks::Task4() {
 	t1 = chrono::high_resolution_clock::now();
 
 	//20% => 10
-	int numOfStrings = auxGst->strings.size();
-	int numOfSearchedStrings = 0;
+	numOfSearchedStrings = 0;
 #pragma omp parallel for
 	for (int i = 0; i < numOfStrings; i++) {
 		searchWithMissmatchesAndSave(0, 10, &auxGst->nodes[auxGst->rootIdx], auxGst->strings[i]);
