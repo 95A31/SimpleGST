@@ -344,10 +344,20 @@ void Tasks::Task4() {
 	t1 = chrono::high_resolution_clock::now();
 
 	//10% => 5
-#pragma omp parallel
-	for (int i = 0; i < (int) auxGst->strings.size(); i++)
-		searchWithMissmatchesAndSave(0, 5, &auxGst->nodes[auxGst->rootIdx],auxGst->strings[i]);
+	int numOfStrings = auxGst->strings.size();
+	int numOfSearchedStrings = 0;
+#pragma omp parallel for
+	for (int i = 0; i < numOfStrings; i++) {
+		searchWithMissmatchesAndSave(0, 5, &auxGst->nodes[auxGst->rootIdx], auxGst->strings[i]);
+#pragma omp atomic
+		numOfSearchedStrings++;
 
+		if (numOfSearchedStrings % 1000 == 0) {
+			cout << "Task 4b: " << floor(((float) numOfSearchedStrings / (float) numOfStrings) * 100) << "%\t\r";
+			cout.flush();
+		}
+
+	}
 
 	t2 = chrono::high_resolution_clock::now();
 	elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
@@ -365,10 +375,20 @@ void Tasks::Task4() {
 	t1 = chrono::high_resolution_clock::now();
 
 	//20% => 10
-#pragma omp parallel
-	for (int i = 0; i < (int) auxGst->strings.size(); i++)
-		searchWithMissmatchesAndSave(0, 10, &auxGst->nodes[auxGst->rootIdx],auxGst->strings[i]);
+	int numOfStrings = auxGst->strings.size();
+	int numOfSearchedStrings = 0;
+#pragma omp parallel for
+	for (int i = 0; i < numOfStrings; i++) {
+		searchWithMissmatchesAndSave(0, 10, &auxGst->nodes[auxGst->rootIdx], auxGst->strings[i]);
+#pragma omp atomic
+		numOfSearchedStrings++;
 
+		if (numOfSearchedStrings % 1000 == 0) {
+			cout << "Task 4c: " << floor(((float) numOfSearchedStrings / (float) numOfStrings) * 100) << "%\t\r";
+			cout.flush();
+		}
+
+	}
 
 	t2 = chrono::high_resolution_clock::now();
 	elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
@@ -560,7 +580,7 @@ void Tasks::findSharedPrefix(string label, short labelLength, Node* currentNode)
 
 	string alphabetSimbols = "$ACGT";
 
-#pragma omp parallel
+#pragma omp parallel for
 	for (short i = 0; i < (short) alphabetSimbols.length(); i++) {
 
 		char c = alphabetSimbols[i];
