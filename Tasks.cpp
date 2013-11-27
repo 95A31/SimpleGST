@@ -190,12 +190,11 @@ void Tasks::Task3() {
 	auto t2 = chrono::high_resolution_clock::now();
 	auto elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
-	cout << "Task 3a: The strings are reversed! (" << elapsed.count() << " ms)" << endl;
-	cout << "Multiplicity String" << endl;
-	for (pair<string, int> result : resultsT3)
-		printf("%12d %s\n", result.second, result.first.c_str());
+	cout << "Candidate adapter list (the strings are reversed!):" << endl;
+	printStringsInfo(MAX_SUFFIXES);
 	cout << endl;
 
+	cout << "Task 3a: (" << elapsed.count() << " ms)" << endl;
 	cout << "Insert the candidate adapter (just copy/paste):" << endl;
 	cin >> adapter;
 	adapter = string(adapter.rbegin(), adapter.rend());
@@ -230,32 +229,13 @@ void Tasks::addToResultsT3(Node* n) {
 }
 
 void Tasks::addToResultsT3(string label, Node* n) {
-	if (label.compare("$") == 0)
-		return;
 
 	label.pop_back();
 	label = string(label.rbegin(), label.rend());
 
 	int multiplicity = n->suffixes.size();
 
-	if (counter + 1 <= MAX_SUFFIXES) {
-		auxStructT3[multiplicity].insert(label);
-
-		resultsT3[label] = multiplicity;
-		counter++;
-	} else if (auxStructT3.begin()->first < multiplicity) {
-		resultsT3.erase(*--auxStructT3.begin()->second.end());
-
-		if (auxStructT3.begin()->second.size() == 1)
-			auxStructT3.erase(auxStructT3.begin());
-		else
-			auxStructT3.begin()->second.erase(--auxStructT3.begin()->second.end());
-
-		auxStructT3[multiplicity].insert(label);
-
-		resultsT3[label] = multiplicity;
-		counter++;
-	}
+	auxStructT3[multiplicity].insert(label);
 }
 
 void Tasks::collectMostFrequenSuffixes(string label, Node* currentNode) {
@@ -320,8 +300,6 @@ void Tasks::Task4() {
 	auxGst = new GeneralizedSuffixTree(ss);
 	cout << endl;
 
-	counter = 0;
-	resultsT3.clear();
 	auxStructT3.clear();
 
 	auto t1 = chrono::high_resolution_clock::now();
@@ -332,13 +310,8 @@ void Tasks::Task4() {
 	auto elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
 	cout << "Task 4a: (" << elapsed.count() << " ms)" << endl;
-	cout << "Multiplicity String" << endl;
-	for (pair<string, int> result : resultsT3)
-		printf("%12d %s\n", result.second, result.first.c_str());
-	cout << endl;
+	printStringsInfo(MAX_DUPLICATES);
 
-	counter = 0;
-	resultsT3.clear();
 	auxStructT3.clear();
 
 	t1 = chrono::high_resolution_clock::now();
@@ -363,13 +336,8 @@ void Tasks::Task4() {
 	elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
 	cout << "Task 4b: (" << elapsed.count() << " ms)" << endl;
-	cout << "Multiplicity String" << endl;
-	for (pair<string, int> result : resultsT3)
-		printf("%12d %s\n", result.second, result.first.c_str());
-	cout << endl;
+	printStringsInfo(MAX_DUPLICATES_MISSMATCH);
 
-	counter = 0;
-	resultsT3.clear();
 	auxStructT3.clear();
 
 	t1 = chrono::high_resolution_clock::now();
@@ -393,13 +361,8 @@ void Tasks::Task4() {
 	elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
 	cout << "Task 4c: (" << elapsed.count() << " ms)" << endl;
-	cout << "Multiplicity String" << endl;
-	for (pair<string, int> result : resultsT3)
-		printf("%12d %s\n", result.second, result.first.c_str());
-	cout << endl;
+	printStringsInfo(MAX_DUPLICATES_MISSMATCH);
 
-	counter = 0;
-	resultsT3.clear();
 	auxStructT3.clear();
 
 	t1 = chrono::high_resolution_clock::now();
@@ -407,13 +370,8 @@ void Tasks::Task4() {
 	findSharedPrefix("", 10, &auxGst->nodes[auxGst->rootIdx]);
 
 	cout << "Task 4d: (" << elapsed.count() << " ms)" << endl;
-	cout << "Multiplicity String" << endl;
-	for (pair<string, int> result : resultsT3)
-		printf("%12d %s\n", result.second, result.first.c_str());
-	cout << endl;
+	printStringsInfo(MAX_DUPLICATES_COMM_PREFIX);
 
-	counter = 0;
-	resultsT3.clear();
 	auxStructT3.clear();
 
 	t1 = chrono::high_resolution_clock::now();
@@ -421,13 +379,8 @@ void Tasks::Task4() {
 	findSharedPrefix("", 15, &auxGst->nodes[auxGst->rootIdx]);
 
 	cout << "Task 4e: (" << elapsed.count() << " ms)" << endl;
-	cout << "Multiplicity String" << endl;
-	for (pair<string, int> result : resultsT3)
-		printf("%12d %s\n", result.second, result.first.c_str());
-	cout << endl;
+	printStringsInfo(MAX_DUPLICATES_COMM_PREFIX);
 
-	counter = 0;
-	resultsT3.clear();
 	auxStructT3.clear();
 
 	t1 = chrono::high_resolution_clock::now();
@@ -435,13 +388,10 @@ void Tasks::Task4() {
 	findSharedPrefix("", 20, &auxGst->nodes[auxGst->rootIdx]);
 
 	cout << "Task 4f: (" << elapsed.count() << " ms)" << endl;
-	cout << "Multiplicity String" << endl;
-	for (pair<string, int> result : resultsT3)
-		printf("%12d %s\n", result.second, result.first.c_str());
-	cout << endl;
+	printStringsInfo(MAX_DUPLICATES_COMM_PREFIX);
 }
 
-void Tasks::addToResultsT4(Node* n, short maxNumOfSeqs) {
+void Tasks::addToResultsT4(Node* n) {
 	int multiplicity = n->suffixes.size();
 
 	int stringIdx = -1;
@@ -452,68 +402,32 @@ void Tasks::addToResultsT4(Node* n, short maxNumOfSeqs) {
 		else
 			stringIdx = suffix.first;
 	}
+	if (multiplicity > 1) {
+
+		string label = auxGst->strings[stringIdx];
+		label.pop_back();
 
 #pragma omp critical (results3)
-	{
-		if (multiplicity > 1) {
-
-			string label = auxGst->strings[stringIdx];
-			label.pop_back();
-			if (resultsT3.count(label) > 0)
-				resultsT3[label] += multiplicity;
-			else if (counter + 1 <= maxNumOfSeqs) {
-				auxStructT3[multiplicity].insert(label);
-
-				resultsT3[label] = multiplicity;
-				counter++;
-			} else if (auxStructT3.begin()->first < multiplicity) {
-				resultsT3.erase(*--auxStructT3.begin()->second.end());
-
-				if (auxStructT3.begin()->second.size() == 1)
-					auxStructT3.erase(auxStructT3.begin());
-				else
-					auxStructT3.begin()->second.erase(--auxStructT3.begin()->second.end());
-
-				auxStructT3[multiplicity].insert(label);
-
-				resultsT3[label] = multiplicity;
-				counter++;
-			}
+		{
+			auxStructT3[multiplicity].insert(label);
 		}
 	}
 }
 
-void Tasks::addToResultsT4(Node* n, int maxNumOfSeqs, string label) {
+void Tasks::addToResultsT4(Node* n, string label) {
 	int multiplicity = n->suffixes.size();
 
 	for (auto suffix : n->suffixes)
 		if (suffix.second > 0)
 			multiplicity--;
 
+	if (multiplicity > 1) {
+
+		label.pop_back();
+
 #pragma omp critical (results3)
-	{
-		if (multiplicity > 1) {
-
-			label.pop_back();
-
-			if (counter + 1 <= maxNumOfSeqs) {
-				auxStructT3[multiplicity].insert(label);
-
-				resultsT3[label] = multiplicity;
-				counter++;
-			} else if (auxStructT3.begin()->first < multiplicity) {
-				resultsT3.erase(*--auxStructT3.begin()->second.end());
-
-				if (auxStructT3.begin()->second.size() == 1)
-					auxStructT3.erase(auxStructT3.begin());
-				else
-					auxStructT3.begin()->second.erase(*--auxStructT3.begin()->second.end());
-
-				auxStructT3[multiplicity].insert(label);
-
-				resultsT3[label] = multiplicity;
-				counter++;
-			}
+		{
+			auxStructT3[multiplicity].insert(label);
 		}
 	}
 }
@@ -522,7 +436,7 @@ void Tasks::collectDuplicates(Node* currentNode) {
 
 	//Deep First Visit
 	if (currentNode->children.empty()) {
-		addToResultsT4(currentNode, MAX_DUPLICATES);
+		addToResultsT4(currentNode);
 		return;
 	}
 
@@ -551,14 +465,14 @@ void Tasks::searchWithMissmatchesAndSave(short currentCharIdx, short currentErr,
 			Node* child = &auxGst->nodes[currentNode->children[c]];
 
 			if (currentNode->children.count('$') > 0)
-				addToResultsT4(&auxGst->nodes[currentNode->children['$']], INT_MAX, label);
+				addToResultsT4(&auxGst->nodes[currentNode->children['$']], label);
 
 			short numOfMismatches = countMismatches(child->stringIdx, child->labelStartIdx, child->labelEndIdx, currentCharIdx);
 
 			if (numOfMismatches > currentErr or numOfMismatches == -2)
 				continue;
 			else if (numOfMismatches == -1 and label[currentCharIdx] == '$') {
-				addToResultsT4(child, INT_MAX, label);
+				addToResultsT4(child, label);
 				continue;
 			}
 
@@ -573,7 +487,7 @@ void Tasks::findSharedPrefix(string label, short labelLength, Node* currentNode)
 
 //Deep First Visit
 	if (currentNode->children.empty()) {
-		addToResultsT4(currentNode, MAX_DUPLICATES_COMM_PREFIX, label);
+		addToResultsT4(currentNode, label);
 		return;
 	}
 
@@ -596,3 +510,20 @@ void Tasks::findSharedPrefix(string label, short labelLength, Node* currentNode)
 	}
 }
 
+void Tasks::printStringsInfo(const int& maxNumOfSeqs) {
+	cout << "Multiplicity String" << endl;
+	int count = 0;
+
+	orderedByFrequencyAuxStructT3 = new map<int, set<string>>(auxStructT3.begin(), auxStructT3.end());
+
+	for (map<int, set<string>>::reverse_iterator entryIt = orderedByFrequencyAuxStructT3->rbegin(); entryIt != orderedByFrequencyAuxStructT3->rend(); entryIt++)
+		if (count < maxNumOfSeqs)
+			for (set<string>::iterator stringIt = (*entryIt).second.begin(); stringIt != (*entryIt).second.end(); stringIt++)
+				if (count < maxNumOfSeqs) {
+					printf("%12d %s\n", (*entryIt).first, (*stringIt).c_str());
+					count++;
+				}
+	cout << endl;
+
+	orderedByFrequencyAuxStructT3->clear();
+}
