@@ -312,56 +312,76 @@ void Tasks::Task4() {
 	cout << "Task 4a: (" << elapsed.count() << " ms)" << endl;
 	printStringsInfo(MAX_DUPLICATES);
 
-	auxStructT3.clear();
+	bool skipSearchWithMissmatches = true;
 
-	t1 = chrono::high_resolution_clock::now();
+	while (true) {
+		cout << endl;
+		cout << "You want skip search with mismatches? [y]" << endl;
+		string a;
+		cin >> a;
+		if (a.empty() or a.compare("y") == 0)
+			break;
 
-	//10% => 5
-	int numOfStrings = auxGst->strings.size();
-	int numOfSearchedStrings = 0;
-#pragma omp parallel for
-	for (int i = 0; i < numOfStrings; i++) {
-		searchWithMissmatchesAndSave(0, 5, &auxGst->nodes[auxGst->rootIdx], auxGst->strings[i]);
-#pragma omp atomic
-		numOfSearchedStrings++;
-
-		if (numOfSearchedStrings % 1000 == 0) {
-			cout << "Task 4b: " << floor(((float) numOfSearchedStrings / (float) numOfStrings) * 100) << "%\t\r";
-			cout.flush();
+		if (a.compare("n") == 0) {
+			skipSearchWithMissmatches = false;
+			break;
 		}
-
 	}
 
-	t2 = chrono::high_resolution_clock::now();
-	elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
+	if (not skipSearchWithMissmatches) {
 
-	cout << "Task 4b: (" << elapsed.count() << " ms)" << endl;
-	printStringsInfo(MAX_DUPLICATES_MISSMATCH);
+		auxStructT3.clear();
 
-	auxStructT3.clear();
+		t1 = chrono::high_resolution_clock::now();
 
-	t1 = chrono::high_resolution_clock::now();
-
-	//20% => 10
-	numOfSearchedStrings = 0;
+		//10% => 5
+		int numOfStrings = auxGst->strings.size();
+		int numOfSearchedStrings = 0;
 #pragma omp parallel for
-	for (int i = 0; i < numOfStrings; i++) {
-		searchWithMissmatchesAndSave(0, 10, &auxGst->nodes[auxGst->rootIdx], auxGst->strings[i]);
+		for (int i = 0; i < numOfStrings; i++) {
+			searchWithMissmatchesAndSave(0, 5, &auxGst->nodes[auxGst->rootIdx], auxGst->strings[i]);
 #pragma omp atomic
-		numOfSearchedStrings++;
+			numOfSearchedStrings++;
 
-		if (numOfSearchedStrings % 1000 == 0) {
-			cout << "Task 4c: " << floor(((float) numOfSearchedStrings / (float) numOfStrings) * 100) << "%\t\r";
-			cout.flush();
+			if (numOfSearchedStrings % 1000 == 0) {
+				cout << "Task 4b: " << floor(((float) numOfSearchedStrings / (float) numOfStrings) * 100) << "%\t\r";
+				cout.flush();
+			}
+
 		}
 
+		t2 = chrono::high_resolution_clock::now();
+		elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
+
+		cout << "Task 4b: (" << elapsed.count() << " ms)" << endl;
+		printStringsInfo(MAX_DUPLICATES_MISSMATCH);
+
+		auxStructT3.clear();
+
+		t1 = chrono::high_resolution_clock::now();
+
+		//20% => 10
+		numOfSearchedStrings = 0;
+#pragma omp parallel for
+		for (int i = 0; i < numOfStrings; i++) {
+			searchWithMissmatchesAndSave(0, 10, &auxGst->nodes[auxGst->rootIdx], auxGst->strings[i]);
+#pragma omp atomic
+			numOfSearchedStrings++;
+
+			if (numOfSearchedStrings % 1000 == 0) {
+				cout << "Task 4c: " << floor(((float) numOfSearchedStrings / (float) numOfStrings) * 100) << "%\t\r";
+				cout.flush();
+			}
+
+		}
+
+		t2 = chrono::high_resolution_clock::now();
+		elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
+
+		cout << "Task 4c: (" << elapsed.count() << " ms)" << endl;
+		printStringsInfo(MAX_DUPLICATES_MISSMATCH);
+
 	}
-
-	t2 = chrono::high_resolution_clock::now();
-	elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-
-	cout << "Task 4c: (" << elapsed.count() << " ms)" << endl;
-	printStringsInfo(MAX_DUPLICATES_MISSMATCH);
 
 	auxStructT3.clear();
 
