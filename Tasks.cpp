@@ -316,7 +316,8 @@ void Tasks::Task4() {
 
 	while (true) {
 		cout << endl;
-		cout << "You want skip search with mismatches? [y]" << endl;
+		cin.clear() ;
+		cout << "Do you want skip search with mismatches? [y]" << endl;
 		string a;
 		cin >> a;
 		if (a.empty() or a.compare("y") == 0)
