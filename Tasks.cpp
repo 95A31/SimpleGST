@@ -328,6 +328,7 @@ void Tasks::Task4() {
 			break;
 		}
 	}
+	 cout << endl;
 
 	if (not skipSearchWithMissmatches) {
 
