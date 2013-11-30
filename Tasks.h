@@ -36,16 +36,22 @@ public:
 	string adapter = "TGGAATTCTCGGGTGCCAAGGAACTCCAGTCACACAGTGATCTCGTATGCCGTCTTCTGCTTG$";
 
 	unordered_map<short, int> resultsT1T2;	//<length, multiplicity>
-	unordered_map<int, set<string>> auxStructT3; //<multiplicity,string>
+	unordered_map<int, set<string>> resultsT3; //<multiplicity,string>
+	map<string, int> auxStructT3; //<string, multiplicity>
 	map<int, set<string>>* orderedByFrequencyAuxStructT3;
 
 	unordered_map<int, set<short>> auxStruct2T3;	//<String Idex, Trimmed length>
 	GeneralizedSuffixTree* auxGst;
 
-	const int MAX_SUFFIXES = 400;
-	const int MAX_DUPLICATES = 10;
-	const int MAX_DUPLICATES_MISSMATCH = 10;
-	const int MAX_DUPLICATES_COMM_PREFIX  = 10;
+	const short MAX_SUFFIXES = 400;
+	const short MAX_DUPLICATES = 10;
+	const short MAX_DUPLICATES_MISSMATCH = 10;
+	const short MAX_DUPLICATES_COMM_PREFIX  = 10;
+
+	short counter = 0;
+	int minMultiplicity = 0;
+	void clearDatastructure();
+	void updateMinMultiplicity();
 
 	void Task1();
 	void trimAndLengthDist();
@@ -62,13 +68,13 @@ public:
 	void trimAndSave();
 
 	void Task4();
-	void addToResultsT4(Node* n);
-	void addToResultsT4(Node* n, string label);
-	void collectDuplicates(Node* currentNode);
-	void searchWithMissmatchesAndSave(short currentCharIdx, short currentErr, Node* currentNode, string& label);
-	void findSharedPrefix(string label, short labelLength, Node* currentNode);
+	void addToResultsT4(Node* n, short maxNumOfSeqs);
+	void addToResultsT4(Node* n, string label, short maxNumOfSeqs);
+	void collectDuplicates(Node* currentNode, short maxNumOfSeqs);
+	void searchWithMissmatchesAndSave(short currentCharIdx, short currentErr, Node* currentNode, string& label, short maxNumOfSeqs);
+	void findSharedPrefix(string label, short labelLength, Node* currentNode, short maxNumOfSeqs);
 
-	void printStringsInfo(const int& maxNumOfSeqs);
+	void printStringsInfo();
 
 
 };

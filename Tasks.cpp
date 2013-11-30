@@ -33,6 +33,7 @@ using namespace std;
 Tasks::Tasks(GeneralizedSuffixTree* t) {
 	gst = t;
 	auxGst = nullptr;
+	orderedByFrequencyAuxStructT3 = nullptr;
 }
 
 Tasks::~Tasks() {
@@ -192,7 +193,7 @@ void Tasks::Task3() {
 	auto elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
 	cout << "Candidate adapter list (the strings are reversed!):" << endl;
-	printStringsInfo(MAX_SUFFIXES);
+	printStringsInfo();
 	cout << endl;
 
 	cout << "Task 3a: (" << elapsed.count() << " ms)" << endl;
@@ -236,12 +237,42 @@ void Tasks::addToResultsT3(string label, Node* n) {
 
 	int multiplicity = n->suffixes.size();
 
-	auxStructT3[multiplicity].insert(label);
+	if (auxStructT3.count(label) > 0) {
+
+		resultsT3[auxStructT3[label]].erase(label);
+
+		auxStructT3[label] += multiplicity;
+
+		resultsT3[auxStructT3[label]].insert(label);
+
+	} else if (counter + 1 <= MAX_SUFFIXES) {
+		minMultiplicity = multiplicity < minMultiplicity ? multiplicity : minMultiplicity;
+
+		resultsT3[multiplicity].insert(label);
+
+		auxStructT3[label] = multiplicity;
+
+		counter++;
+	} else if (minMultiplicity < multiplicity) {
+		auxStructT3.erase(*--resultsT3[minMultiplicity].end());
+
+		if (resultsT3[minMultiplicity].size() == 1) {
+			resultsT3.erase(minMultiplicity);
+			updateMinMultiplicity();
+		} else
+			resultsT3[minMultiplicity].erase(--resultsT3[minMultiplicity].end());
+
+		resultsT3[multiplicity].insert(label);
+
+		auxStructT3[label] = multiplicity;
+
+		counter++;
+	}
 }
 
 void Tasks::collectMostFrequenSuffixes(string label, Node* currentNode) {
 
-	//Deep First Visit
+//Deep First Visit
 	if (currentNode->children.empty()) {
 		addToResultsT3(label, currentNode);
 		return;
@@ -292,6 +323,8 @@ void Tasks::trimAndSave() {
 void Tasks::Task4() {
 	cout << endl << endl;
 
+	delete gst;
+
 	vector<string> ss;
 
 	for (pair<int, set<short>> entry : auxStruct2T3)
@@ -301,23 +334,23 @@ void Tasks::Task4() {
 	auxGst = new GeneralizedSuffixTree(ss);
 	cout << endl;
 
-	auxStructT3.clear();
+	clearDatastructure();
 
 	auto t1 = chrono::high_resolution_clock::now();
 
-	collectDuplicates(&auxGst->nodes[gst->rootIdx]);
+	collectDuplicates(&auxGst->nodes[gst->rootIdx], MAX_DUPLICATES);
 
 	auto t2 = chrono::high_resolution_clock::now();
 	auto elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
 	cout << "Task 4a: (" << elapsed.count() << " ms)" << endl;
-	printStringsInfo(MAX_DUPLICATES);
+	printStringsInfo();
 
 	bool skipSearchWithMissmatches = true;
 
 	while (true) {
 		cout << endl;
-		cin.clear() ;
+		cin.clear();
 		cout << "Do you want skip search with mismatches? [y]" << endl;
 		string a;
 		cin >> a;
@@ -329,11 +362,11 @@ void Tasks::Task4() {
 			break;
 		}
 	}
-	 cout << endl;
+	cout << endl;
 
 	if (not skipSearchWithMissmatches) {
 
-		auxStructT3.clear();
+		clearDatastructure();
 
 		t1 = chrono::high_resolution_clock::now();
 
@@ -342,7 +375,7 @@ void Tasks::Task4() {
 		int numOfSearchedStrings = 0;
 #pragma omp parallel for
 		for (int i = 0; i < numOfStrings; i++) {
-			searchWithMissmatchesAndSave(0, 5, &auxGst->nodes[auxGst->rootIdx], auxGst->strings[i]);
+			searchWithMissmatchesAndSave(0, 5, &auxGst->nodes[auxGst->rootIdx], auxGst->strings[i], MAX_DUPLICATES_MISSMATCH);
 #pragma omp atomic
 			numOfSearchedStrings++;
 
@@ -352,14 +385,13 @@ void Tasks::Task4() {
 			}
 
 		}
-
 		t2 = chrono::high_resolution_clock::now();
 		elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
 		cout << "Task 4b: (" << elapsed.count() << " ms)" << endl;
-		printStringsInfo(MAX_DUPLICATES_MISSMATCH);
+		printStringsInfo();
 
-		auxStructT3.clear();
+		clearDatastructure();
 
 		t1 = chrono::high_resolution_clock::now();
 
@@ -367,7 +399,7 @@ void Tasks::Task4() {
 		numOfSearchedStrings = 0;
 #pragma omp parallel for
 		for (int i = 0; i < numOfStrings; i++) {
-			searchWithMissmatchesAndSave(0, 10, &auxGst->nodes[auxGst->rootIdx], auxGst->strings[i]);
+			searchWithMissmatchesAndSave(0, 10, &auxGst->nodes[auxGst->rootIdx], auxGst->strings[i], MAX_DUPLICATES_MISSMATCH);
 #pragma omp atomic
 			numOfSearchedStrings++;
 
@@ -382,39 +414,40 @@ void Tasks::Task4() {
 		elapsed = chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 
 		cout << "Task 4c: (" << elapsed.count() << " ms)" << endl;
-		printStringsInfo(MAX_DUPLICATES_MISSMATCH);
+		printStringsInfo();
 
 	}
 
-	auxStructT3.clear();
+	clearDatastructure();
 
 	t1 = chrono::high_resolution_clock::now();
 
-	findSharedPrefix("", 10, &auxGst->nodes[auxGst->rootIdx]);
+	findSharedPrefix("", 10, &auxGst->nodes[auxGst->rootIdx], MAX_DUPLICATES_COMM_PREFIX);
 
 	cout << "Task 4d: (" << elapsed.count() << " ms)" << endl;
-	printStringsInfo(MAX_DUPLICATES_COMM_PREFIX);
-
+	printStringsInfo();
+	counter = 0;
+	resultsT3.clear();
 	auxStructT3.clear();
 
 	t1 = chrono::high_resolution_clock::now();
 
-	findSharedPrefix("", 15, &auxGst->nodes[auxGst->rootIdx]);
+	findSharedPrefix("", 15, &auxGst->nodes[auxGst->rootIdx], MAX_DUPLICATES_COMM_PREFIX);
 
 	cout << "Task 4e: (" << elapsed.count() << " ms)" << endl;
-	printStringsInfo(MAX_DUPLICATES_COMM_PREFIX);
+	printStringsInfo();
 
-	auxStructT3.clear();
+	clearDatastructure();
 
 	t1 = chrono::high_resolution_clock::now();
 
-	findSharedPrefix("", 20, &auxGst->nodes[auxGst->rootIdx]);
+	findSharedPrefix("", 20, &auxGst->nodes[auxGst->rootIdx], MAX_DUPLICATES_COMM_PREFIX);
 
 	cout << "Task 4f: (" << elapsed.count() << " ms)" << endl;
-	printStringsInfo(MAX_DUPLICATES_COMM_PREFIX);
+	printStringsInfo();
 }
 
-void Tasks::addToResultsT4(Node* n) {
+void Tasks::addToResultsT4(Node* n, short maxNumOfSeqs) {
 	int multiplicity = n->suffixes.size();
 
 	int stringIdx = -1;
@@ -425,41 +458,98 @@ void Tasks::addToResultsT4(Node* n) {
 		else
 			stringIdx = suffix.first;
 	}
-	if (multiplicity > 1) {
-
-		string label = auxGst->strings[stringIdx];
-		label.pop_back();
 
 #pragma omp critical (results3)
-		{
-			auxStructT3[multiplicity].insert(label);
+	{
+		if (multiplicity > 1) {
+
+			string label = auxGst->strings[stringIdx];
+			label.pop_back();
+
+			if (auxStructT3.count(label) > 0) {
+
+				resultsT3[auxStructT3[label]].erase(label);
+
+				auxStructT3[label] += multiplicity;
+
+				resultsT3[auxStructT3[label]].insert(label);
+			} else if (counter + 1 <= maxNumOfSeqs) {
+				minMultiplicity = multiplicity < minMultiplicity ? multiplicity : minMultiplicity;
+
+				resultsT3[multiplicity].insert(label);
+
+				auxStructT3[label] = multiplicity;
+
+				counter++;
+			} else if (minMultiplicity < multiplicity) {
+				auxStructT3.erase(*--resultsT3[minMultiplicity].end());
+
+				if (resultsT3[minMultiplicity].size() == 1) {
+					resultsT3.erase(minMultiplicity);
+					updateMinMultiplicity();
+				} else
+					resultsT3[minMultiplicity].erase(--resultsT3[minMultiplicity].end());
+
+				resultsT3[multiplicity].insert(label);
+
+				auxStructT3[label] = multiplicity;
+				counter++;
+			}
 		}
 	}
 }
 
-void Tasks::addToResultsT4(Node* n, string label) {
+void Tasks::addToResultsT4(Node* n, string label, short maxNumOfSeqs) {
 	int multiplicity = n->suffixes.size();
 
 	for (auto suffix : n->suffixes)
 		if (suffix.second > 0)
 			multiplicity--;
 
-	if (multiplicity > 1) {
-
-		label.pop_back();
-
 #pragma omp critical (results3)
-		{
-			auxStructT3[multiplicity].insert(label);
+	{
+		if (multiplicity > 1) {
+			label.pop_back();
+
+			if (auxStructT3.count(label) > 0) {
+
+				resultsT3[auxStructT3[label]].erase(label);
+
+				auxStructT3[label] += multiplicity;
+
+				resultsT3[auxStructT3[label]].insert(label);
+
+			} else if (counter + 1 <= maxNumOfSeqs) {
+				minMultiplicity = multiplicity < minMultiplicity ? multiplicity : minMultiplicity;
+
+				resultsT3[multiplicity].insert(label);
+
+				auxStructT3[label] = multiplicity;
+
+				counter++;
+			} else if (minMultiplicity < multiplicity) {
+				auxStructT3.erase(*--resultsT3[minMultiplicity].end());
+
+				if (resultsT3[minMultiplicity].size() == 1) {
+					resultsT3.erase(minMultiplicity);
+					updateMinMultiplicity();
+				} else
+					resultsT3[minMultiplicity].erase(--resultsT3[minMultiplicity].end());
+
+				resultsT3[multiplicity].insert(label);
+
+				auxStructT3[label] = multiplicity;
+				counter++;
+			}
 		}
 	}
 }
 
-void Tasks::collectDuplicates(Node* currentNode) {
+void Tasks::collectDuplicates(Node* currentNode, short maxNumOfSeqs) {
 
-	//Deep First Visit
+//Deep First Visit
 	if (currentNode->children.empty()) {
-		addToResultsT4(currentNode);
+		addToResultsT4(currentNode, maxNumOfSeqs);
 		return;
 	}
 
@@ -468,16 +558,16 @@ void Tasks::collectDuplicates(Node* currentNode) {
 	for (char c : alphabetSimbols) {
 		if (currentNode->children.count(c) > 0) {
 			Node * child = &auxGst->nodes[currentNode->children[c]];
-			collectDuplicates(child);
+			collectDuplicates(child, maxNumOfSeqs);
 		}
 	}
 
 	return;
 }
 
-void Tasks::searchWithMissmatchesAndSave(short currentCharIdx, short currentErr, Node* currentNode, string& label) {
+void Tasks::searchWithMissmatchesAndSave(short currentCharIdx, short currentErr, Node* currentNode, string& label, short maxNumOfSeqs) {
 
-	//Deep First Visit
+//Deep First Visit
 	if (currentCharIdx >= (short) label.length())
 		return;
 
@@ -488,29 +578,29 @@ void Tasks::searchWithMissmatchesAndSave(short currentCharIdx, short currentErr,
 			Node* child = &auxGst->nodes[currentNode->children[c]];
 
 			if (currentNode->children.count('$') > 0)
-				addToResultsT4(&auxGst->nodes[currentNode->children['$']], label);
+				addToResultsT4(&auxGst->nodes[currentNode->children['$']], label, maxNumOfSeqs);
 
 			short numOfMismatches = countMismatches(auxGst, child, currentCharIdx);
 
 			if (numOfMismatches > currentErr or numOfMismatches == -2)
 				continue;
 			else if (numOfMismatches == -1 and label[currentCharIdx] == '$') {
-				addToResultsT4(child, label);
+				addToResultsT4(child, label, maxNumOfSeqs);
 				continue;
 			}
 
-			searchWithMissmatchesAndSave(currentCharIdx + child->getLabelLength(), currentErr - numOfMismatches, child, label);
+			searchWithMissmatchesAndSave(currentCharIdx + child->getLabelLength(), currentErr - numOfMismatches, child, label, maxNumOfSeqs);
 		}
 	}
 
 	return;
 }
 
-void Tasks::findSharedPrefix(string label, short labelLength, Node* currentNode) {
+void Tasks::findSharedPrefix(string label, short labelLength, Node* currentNode, short maxNumOfSeqs) {
 
 //Deep First Visit
 	if (currentNode->children.empty()) {
-		addToResultsT4(currentNode, label);
+		addToResultsT4(currentNode, label, maxNumOfSeqs);
 		return;
 	}
 
@@ -528,25 +618,32 @@ void Tasks::findSharedPrefix(string label, short labelLength, Node* currentNode)
 				childLabel.append(auxGst->getEdgeString(*child));
 				childLabel = childLabel.substr(0, labelLength);
 			}
-			findSharedPrefix(childLabel, labelLength, child);
+			findSharedPrefix(childLabel, labelLength, child, maxNumOfSeqs);
 		}
 	}
 }
 
-void Tasks::printStringsInfo(const int& maxNumOfSeqs) {
-	cout << "Multiplicity String" << endl;
-	int count = 0;
+void Tasks::clearDatastructure() {
+	counter = 0;
+	resultsT3.clear();
+	auxStructT3.clear();
+}
 
-	orderedByFrequencyAuxStructT3 = new map<int, set<string>>(auxStructT3.begin(), auxStructT3.end());
+void Tasks::updateMinMultiplicity() {
+	for (pair<int, set<string>> entry : resultsT3)
+		minMultiplicity = entry.first < minMultiplicity ? entry.first : minMultiplicity;
+}
+
+void Tasks::printStringsInfo() {
+	cout << "Multiplicity String" << endl;
+
+	orderedByFrequencyAuxStructT3 = new map<int, set<string>>(resultsT3.begin(), resultsT3.end());
 
 	for (map<int, set<string>>::reverse_iterator entryIt = orderedByFrequencyAuxStructT3->rbegin(); entryIt != orderedByFrequencyAuxStructT3->rend(); entryIt++)
-		if (count < maxNumOfSeqs)
-			for (set<string>::iterator stringIt = (*entryIt).second.begin(); stringIt != (*entryIt).second.end(); stringIt++)
-				if (count < maxNumOfSeqs) {
-					printf("%12d %s\n", (*entryIt).first, (*stringIt).c_str());
-					count++;
-				}
+		for (set<string>::iterator stringIt = (*entryIt).second.begin(); stringIt != (*entryIt).second.end(); stringIt++)
+			printf("%12d %s\n", (*entryIt).first, (*stringIt).c_str());
+
 	cout << endl;
 
-	orderedByFrequencyAuxStructT3->clear();
+	delete orderedByFrequencyAuxStructT3;
 }
