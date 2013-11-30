@@ -25,7 +25,6 @@
 #include <algorithm>
 #include <vector>
 #include <chrono>
-#include <climits>
 #include <omp.h>
 
 using namespace std;
@@ -624,12 +623,14 @@ void Tasks::findSharedPrefix(string label, short labelLength, Node* currentNode,
 }
 
 void Tasks::clearDatastructure() {
+	minMultiplicity = INT_MAX;
 	counter = 0;
 	resultsT3.clear();
 	auxStructT3.clear();
 }
 
 void Tasks::updateMinMultiplicity() {
+	minMultiplicity = INT_MAX;
 	for (pair<int, set<string>> entry : resultsT3)
 		minMultiplicity = entry.first < minMultiplicity ? entry.first : minMultiplicity;
 }

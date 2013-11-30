@@ -22,6 +22,8 @@
 
 #include <map>
 #include <set>
+#include <climits>
+
 
 #include "GeneralizedSuffixTree.h"
 #include "Node.h"
@@ -49,7 +51,7 @@ public:
 	const short MAX_DUPLICATES_COMM_PREFIX  = 10;
 
 	short counter = 0;
-	int minMultiplicity = 0;
+	int minMultiplicity = INT_MAX;
 	void clearDatastructure();
 	void updateMinMultiplicity();
 
