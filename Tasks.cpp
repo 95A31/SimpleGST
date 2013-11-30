@@ -322,8 +322,6 @@ void Tasks::trimAndSave() {
 void Tasks::Task4() {
 	cout << endl << endl;
 
-	delete gst;
-
 	vector<string> ss;
 
 	for (pair<int, set<short>> entry : auxStruct2T3)
