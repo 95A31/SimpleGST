@@ -162,6 +162,10 @@ void Tasks::searchWithMissmatches(short currentCharIdx, short currentErr, Node* 
 
 short Tasks::countMismatches(int childrenStringIdx, short childrenLabelStartIdx, short childrenLabelEndIdx, short currentCharIdx) {
 	short numOfMismatches = 0;
+
+	cout << gst->strings[childrenStringIdx];
+	cout.flush();
+
 	char* a = &gst->strings[childrenStringIdx][childrenLabelStartIdx];
 	char* b = &adapter[currentCharIdx];
 
