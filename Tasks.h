@@ -53,7 +53,7 @@ public:
 
 	void Task2();
 	void searchWithMissmatches(short currentCharIdx, short currentErr, Node* currentNode);
-	short countMismatches(int childrenStringIdx, short childrenLabelStartIdx, short childrenLabelEndIdx, short currentCharIdx);
+	short countMismatches(GeneralizedSuffixTree* t, Node* n, short currentCharIdx);
 
 	void Task3();
 	void addToResultsT3(Node* n);

@@ -63,21 +63,21 @@ void Tasks::trimAndLengthDist() {
 
 	for (short currentCharIdx = 0; currentCharIdx < (short) adapter.length(); currentCharIdx++) {
 
-		Node* children = &gst->nodes[currentNode->children[adapter[currentCharIdx]]];
+		Node* child = &gst->nodes[currentNode->children[adapter[currentCharIdx]]];
 
 		if (currentNode->children.count('$') > 0 and currentNode != &gst->nodes[gst->rootIdx])
 			addToResultsT1T2(&gst->nodes[currentNode->children['$']]);
 
 		//Walk down
-		short numOfMismatches = countMismatches(children->stringIdx, children->labelStartIdx, children->labelEndIdx, currentCharIdx);
+		short numOfMismatches = countMismatches(gst, child, currentCharIdx);
 
 		if (numOfMismatches == 0) {
-			currentNode = children;
-			currentCharIdx += children->getLabelLength() - 1;
+			currentNode = child;
+			currentCharIdx += child->getLabelLength() - 1;
 			continue;
 
 		} else if (numOfMismatches == -1) {
-			addToResultsT1T2(children);
+			addToResultsT1T2(child);
 			break;
 		}
 
@@ -145,7 +145,7 @@ void Tasks::searchWithMissmatches(short currentCharIdx, short currentErr, Node* 
 		if (currentNode->children.count('$') > 0 and currentNode != &gst->nodes[gst->rootIdx])
 			addToResultsT1T2(&gst->nodes[currentNode->children['$']]);
 
-		short numOfMismatches = countMismatches(child->stringIdx, child->labelStartIdx, child->labelEndIdx, currentCharIdx);
+		short numOfMismatches = countMismatches(gst, child, currentCharIdx);
 
 		if (numOfMismatches > currentErr or numOfMismatches == -2)
 			continue;
@@ -160,16 +160,13 @@ void Tasks::searchWithMissmatches(short currentCharIdx, short currentErr, Node* 
 	return;
 }
 
-short Tasks::countMismatches(int childrenStringIdx, short childrenLabelStartIdx, short childrenLabelEndIdx, short currentCharIdx) {
+short Tasks::countMismatches(GeneralizedSuffixTree* t, Node* node, short currentCharIdx) {
 	short numOfMismatches = 0;
 
-	cout << gst->strings[childrenStringIdx]  << endl;
-	cout.flush();
-
-	char* a = &gst->strings[childrenStringIdx][childrenLabelStartIdx];
+	char* a = &t->strings[node->stringIdx][node->labelStartIdx];
 	char* b = &adapter[currentCharIdx];
 
-	for (short offset = 0; offset <= childrenLabelEndIdx - childrenLabelStartIdx; offset++) {
+	for (short offset = 0; offset <= node->labelEndIdx - node->labelStartIdx; offset++) {
 		if (*(a + offset) == '$')
 			//Path label shorter than adapter
 			return -1;
@@ -270,21 +267,21 @@ void Tasks::trimAndSave() {
 
 	for (short currentCharIdx = 0; currentCharIdx < (short) adapter.length(); currentCharIdx++) {
 
-		Node* children = &gst->nodes[currentNode->children[adapter[currentCharIdx]]];
+		Node* child = &gst->nodes[currentNode->children[adapter[currentCharIdx]]];
 
 		if (currentNode->children.count('$') > 0 and currentNode != &gst->nodes[gst->rootIdx])
 			addToResultsT3(&gst->nodes[currentNode->children['$']]);
 
 		//Walk down
-		short numOfMismatches = countMismatches(children->stringIdx, children->labelStartIdx, children->labelEndIdx, currentCharIdx);
+		short numOfMismatches = countMismatches(gst, child, currentCharIdx);
 
 		if (numOfMismatches == 0) {
-			currentNode = children;
-			currentCharIdx += children->getLabelLength() - 1;
+			currentNode = child;
+			currentCharIdx += child->getLabelLength() - 1;
 			continue;
 
 		} else if (numOfMismatches == -1) {
-			addToResultsT3(children);
+			addToResultsT3(child);
 			break;
 		}
 
@@ -493,7 +490,7 @@ void Tasks::searchWithMissmatchesAndSave(short currentCharIdx, short currentErr,
 			if (currentNode->children.count('$') > 0)
 				addToResultsT4(&auxGst->nodes[currentNode->children['$']], label);
 
-			short numOfMismatches = countMismatches(child->stringIdx, child->labelStartIdx, child->labelEndIdx, currentCharIdx);
+			short numOfMismatches = countMismatches(auxGst, child, currentCharIdx);
 
 			if (numOfMismatches > currentErr or numOfMismatches == -2)
 				continue;
