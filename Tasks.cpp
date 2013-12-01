@@ -242,7 +242,7 @@ void Tasks::addToResultsT3(string label, Node* n) {
 
 		auxStructT3[label] += multiplicity;
 
-		resultsT3[auxStructT3[label]].insert(label);
+		resultsT3[multiplicity].insert(label);
 
 	} else if (counter + 1 < MAX_SUFFIXES) {
 		minMultiplicity = multiplicity < minMultiplicity ? multiplicity : minMultiplicity;
@@ -466,7 +466,8 @@ void Tasks::addToResultsT4(Node* n, short maxNumOfSeqs) {
 
 				auxStructT3[label] += multiplicity;
 
-				resultsT3[auxStructT3[label]].insert(label);
+				resultsT3[multiplicity].insert(label);
+
 			} else if (counter + 1 < maxNumOfSeqs) {
 				minMultiplicity = multiplicity < minMultiplicity ? multiplicity : minMultiplicity;
 
@@ -511,7 +512,7 @@ void Tasks::addToResultsT4(Node* n, string label, short maxNumOfSeqs) {
 
 				auxStructT3[label] += multiplicity;
 
-				resultsT3[auxStructT3[label]].insert(label);
+				resultsT3[multiplicity].insert(label);
 
 			} else if (counter + 1 < maxNumOfSeqs) {
 				minMultiplicity = multiplicity < minMultiplicity ? multiplicity : minMultiplicity;
@@ -623,7 +624,6 @@ void Tasks::clearDatastructure() {
 void Tasks::updateMinMultiplicity() {
 	minMultiplicity = INT_MAX;
 	for (pair<int, set<string>> entry : resultsT3)
-		if (not entry.second.empty())
 			minMultiplicity = entry.first < minMultiplicity ? entry.first : minMultiplicity;
 }
 
