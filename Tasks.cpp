@@ -244,7 +244,7 @@ void Tasks::addToResultsT3(string label, Node* n) {
 
 		resultsT3[auxStructT3[label]].insert(label);
 
-	} else if (counter + 1 <= MAX_SUFFIXES) {
+	} else if (counter + 1 < MAX_SUFFIXES) {
 		minMultiplicity = multiplicity < minMultiplicity ? multiplicity : minMultiplicity;
 
 		resultsT3[multiplicity].insert(label);
@@ -276,8 +276,6 @@ void Tasks::collectMostFrequenSuffixes(string label, Node* currentNode) {
 		addToResultsT3(label, currentNode);
 		return;
 	}
-
-	string alphabetSimbols = "$ACGT";
 
 	for (char c : alphabetSimbols) {
 		if (currentNode->children.count(c) > 0) {
@@ -348,7 +346,7 @@ void Tasks::Task4() {
 	while (true) {
 		cout << endl;
 		cin.clear();
-		cout << "Do you want skip search with mismatches? [y]" << endl;
+		cout << "Do you want skip search with mismatches? (y/n)" << endl;
 		string a;
 		cin >> a;
 		if (a.empty() or a.compare("y") == 0)
@@ -455,13 +453,13 @@ void Tasks::addToResultsT4(Node* n, short maxNumOfSeqs) {
 			stringIdx = suffix.first;
 	}
 
+	if (multiplicity > 1) {
+
+		string label = auxGst->strings[stringIdx];
+		label.pop_back();
+
 #pragma omp critical (results3)
-	{
-		if (multiplicity > 1) {
-
-			string label = auxGst->strings[stringIdx];
-			label.pop_back();
-
+		{
 			if (auxStructT3.count(label) > 0) {
 
 				resultsT3[auxStructT3[label]].erase(label);
@@ -469,7 +467,7 @@ void Tasks::addToResultsT4(Node* n, short maxNumOfSeqs) {
 				auxStructT3[label] += multiplicity;
 
 				resultsT3[auxStructT3[label]].insert(label);
-			} else if (counter + 1 <= maxNumOfSeqs) {
+			} else if (counter + 1 < maxNumOfSeqs) {
 				minMultiplicity = multiplicity < minMultiplicity ? multiplicity : minMultiplicity;
 
 				resultsT3[multiplicity].insert(label);
@@ -502,11 +500,11 @@ void Tasks::addToResultsT4(Node* n, string label, short maxNumOfSeqs) {
 		if (suffix.second > 0)
 			multiplicity--;
 
-#pragma omp critical (results3)
-	{
-		if (multiplicity > 1) {
-			label.pop_back();
+	if (multiplicity > 1) {
+		label.pop_back();
 
+#pragma omp critical (results3)
+		{
 			if (auxStructT3.count(label) > 0) {
 
 				resultsT3[auxStructT3[label]].erase(label);
@@ -515,7 +513,7 @@ void Tasks::addToResultsT4(Node* n, string label, short maxNumOfSeqs) {
 
 				resultsT3[auxStructT3[label]].insert(label);
 
-			} else if (counter + 1 <= maxNumOfSeqs) {
+			} else if (counter + 1 < maxNumOfSeqs) {
 				minMultiplicity = multiplicity < minMultiplicity ? multiplicity : minMultiplicity;
 
 				resultsT3[multiplicity].insert(label);
@@ -567,8 +565,6 @@ void Tasks::searchWithMissmatchesAndSave(short currentCharIdx, short currentErr,
 	if (currentCharIdx >= (short) label.length())
 		return;
 
-	string alphabetSimbols = "$ACGT";
-
 	for (char c : alphabetSimbols) {
 		if (currentNode->children.count(c) > 0) {
 			Node* child = &auxGst->nodes[currentNode->children[c]];
@@ -600,8 +596,6 @@ void Tasks::findSharedPrefix(string label, short labelLength, Node* currentNode,
 		return;
 	}
 
-	string alphabetSimbols = "$ACGT";
-
 #pragma omp parallel for
 	for (short i = 0; i < (short) alphabetSimbols.length(); i++) {
 
@@ -629,7 +623,8 @@ void Tasks::clearDatastructure() {
 void Tasks::updateMinMultiplicity() {
 	minMultiplicity = INT_MAX;
 	for (pair<int, set<string>> entry : resultsT3)
-		minMultiplicity = entry.first < minMultiplicity ? entry.first : minMultiplicity;
+		if (not entry.second.empty())
+			minMultiplicity = entry.first < minMultiplicity ? entry.first : minMultiplicity;
 }
 
 void Tasks::printStringsInfo() {

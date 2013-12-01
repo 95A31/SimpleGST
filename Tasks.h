@@ -49,6 +49,7 @@ public:
 	const short MAX_DUPLICATES = 10;
 	const short MAX_DUPLICATES_MISSMATCH = 10;
 	const short MAX_DUPLICATES_COMM_PREFIX  = 10;
+	const string alphabetSimbols = "$ACGT";
 
 	short counter = 0;
 	int minMultiplicity = INT_MAX;
