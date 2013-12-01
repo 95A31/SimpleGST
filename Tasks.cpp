@@ -238,11 +238,15 @@ void Tasks::addToResultsT3(string label, Node* n) {
 
 	if (auxStructT3.count(label) > 0) {
 
-		resultsT3[auxStructT3[label]].erase(label);
+		if (resultsT3[auxStructT3[label]].size() == 1) {
+			resultsT3.erase(auxStructT3[label]);
+			updateMinMultiplicity();
+		} else
+			resultsT3[auxStructT3[label]].erase(label);
 
 		auxStructT3[label] += multiplicity;
 
-		resultsT3[multiplicity].insert(label);
+		resultsT3[auxStructT3[label]].insert(label);
 
 	} else if (counter + 1 < MAX_SUFFIXES) {
 		minMultiplicity = multiplicity < minMultiplicity ? multiplicity : minMultiplicity;
@@ -462,12 +466,15 @@ void Tasks::addToResultsT4(Node* n, short maxNumOfSeqs) {
 		{
 			if (auxStructT3.count(label) > 0) {
 
-				resultsT3[auxStructT3[label]].erase(label);
+				if (resultsT3[auxStructT3[label]].size() == 1) {
+					resultsT3.erase(auxStructT3[label]);
+					updateMinMultiplicity();
+				} else
+					resultsT3[auxStructT3[label]].erase(label);;
 
 				auxStructT3[label] += multiplicity;
 
-				resultsT3[multiplicity].insert(label);
-
+				resultsT3[auxStructT3[label]].insert(label);
 			} else if (counter + 1 < maxNumOfSeqs) {
 				minMultiplicity = multiplicity < minMultiplicity ? multiplicity : minMultiplicity;
 
@@ -508,11 +515,15 @@ void Tasks::addToResultsT4(Node* n, string label, short maxNumOfSeqs) {
 		{
 			if (auxStructT3.count(label) > 0) {
 
-				resultsT3[auxStructT3[label]].erase(label);
+				if (resultsT3[auxStructT3[label]].size() == 1) {
+					resultsT3.erase(auxStructT3[label]);
+					updateMinMultiplicity();
+				} else
+					resultsT3[auxStructT3[label]].erase(label);
 
 				auxStructT3[label] += multiplicity;
 
-				resultsT3[multiplicity].insert(label);
+				resultsT3[auxStructT3[label]].insert(label);
 
 			} else if (counter + 1 < maxNumOfSeqs) {
 				minMultiplicity = multiplicity < minMultiplicity ? multiplicity : minMultiplicity;
