@@ -423,9 +423,8 @@ void Tasks::Task4() {
 
 	cout << "Task 4d: (" << elapsed.count() << " ms)" << endl;
 	printStringsInfo();
-	counter = 0;
-	resultsT3.clear();
-	auxStructT3.clear();
+
+	clearDatastructure();
 
 	t1 = chrono::high_resolution_clock::now();
 
